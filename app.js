@@ -1,3 +1,8 @@
+alert(
+  JSON.stringify(
+    window.Telegram?.WebApp?.initDataUnsafe || "NO DATA"
+  )
+);
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
