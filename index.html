@@ -2,10 +2,12 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Hash Mining</title>
+  <title>Grok Mining</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Telegram WebApp API -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,9 +16,9 @@
   <header class="glass">
     <h2 id="username">Miner</h2>
     <div class="stats">
-      <div>⚡ <span id="hash">0</span> Hash</div>
-      <div>💰 <span id="balance">0</span> HC</div>
-      <div class="income">+<span id="income">0</span> HC / sec</div>
+      <div>⚡ <span id="hash">0</span> Hash Power</div>
+      <div>💰 <span id="balance">0</span> GRK</div>
+      <div class="income">+<span id="income">0</span> GRK / sec</div>
     </div>
   </header>
 
@@ -24,17 +26,17 @@
 </div>
 
 <nav class="bottom-nav glass">
-  <button onclick="openScreen('main')" class="active">
+  <button class="active" onclick="openScreen('balance', this)">
     💰<span>Баланс</span>
   </button>
-  <button onclick="openScreen('shop')">
+  <button onclick="openScreen('shop', this)">
     🛒<span>Магазин</span>
   </button>
-  <button onclick="openScreen('ads')">
+  <button onclick="openScreen('ads', this)">
     📺<span>Реклама</span>
   </button>
-  <button onclick="openScreen('profile')">
-    ⚙️<span>Профиль</span>
+  <button onclick="openScreen('account', this)">
+    👤<span>Аккаунт</span>
   </button>
 </nav>
 
