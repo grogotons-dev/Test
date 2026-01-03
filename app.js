@@ -1,19 +1,19 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-/* ======================
+/* =====================
    STATE
-====================== */
+===================== */
 let state = JSON.parse(localStorage.getItem("grokGame")) || {
   balance: 0,
-  hash: 0,
-  totalEarned: 0,
-  adsWatched: 0
+  cards: [],
+  lastAdDay: null,
+  adsToday: 0
 };
 
-/* ======================
+/* =====================
    USER
-====================== */
+===================== */
 const username =
   tg.initDataUnsafe?.user?.username ||
   tg.initDataUnsafe?.user?.first_name ||
@@ -21,119 +21,119 @@ const username =
 
 document.getElementById("username").innerText = username;
 
-/* ======================
+/* =====================
    CONSTANTS
-====================== */
-const HASH_TO_GRK = 0.1; // 1 Hash = 0.1 GRK / sec
+===================== */
+const GRK_PER_AD = 15;
+const ADS_LIMIT = 20;
 
-/* ======================
-   SHOP DATA
-====================== */
+/* =====================
+   SHOP (15 days ROI)
+===================== */
 const shopItems = [
-  { name: "GTX 1050", price: 100, hash: 0.1 },
-  { name: "GTX 1660", price: 300, hash: 0.3 },
-  { name: "RTX 3060", price: 800, hash: 1.0 },
-  { name: "RTX 3080", price: 2500, hash: 4.0 },
-  { name: "RTX 4090", price: 8000, hash: 12.0 }
+  {
+    name: "GTX 1050",
+    price: 1000,
+    incomePerSec: 66.6 / 86400
+  },
+  {
+    name: "GTX 1660",
+    price: 3000,
+    incomePerSec: 200 / 86400
+  },
+  {
+    name: "RTX 3060",
+    price: 8000,
+    incomePerSec: 533 / 86400
+  },
+  {
+    name: "RTX 4090",
+    price: 30000,
+    incomePerSec: 2000 / 86400
+  }
 ];
 
-/* ======================
+/* =====================
    GAME LOOP
-====================== */
+===================== */
 setInterval(() => {
-  const income = state.hash * HASH_TO_GRK;
+  let income = 0;
+  state.cards.forEach(c => income += c.incomePerSec);
   state.balance += income;
-  state.totalEarned += income;
   save();
   renderStats();
 }, 1000);
 
-/* ======================
+/* =====================
    SAVE / RENDER
-====================== */
+===================== */
 function save() {
   localStorage.setItem("grokGame", JSON.stringify(state));
 }
 
 function renderStats() {
-  document.getElementById("balance").innerText = state.balance.toFixed(3);
-  document.getElementById("hash").innerText = state.hash.toFixed(3);
+  const income =
+    state.cards.reduce((s, c) => s + c.incomePerSec, 0);
+
+  document.getElementById("balance").innerText =
+    state.balance.toFixed(2);
   document.getElementById("income").innerText =
-    (state.hash * HASH_TO_GRK).toFixed(3);
+    income.toFixed(4);
 }
 
-/* ======================
+/* =====================
    NAV
-====================== */
+===================== */
 function openScreen(screen, btn) {
-  document
-    .querySelectorAll(".bottom-nav button")
+  document.querySelectorAll(".bottom-nav button")
     .forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
 
   const s = document.getElementById("screen");
 
-  /* ===== BALANCE ===== */
   if (screen === "balance") {
     s.innerHTML = `
-      <h3>💰 Баланс Grok</h3>
-      <p>Доступно: <b>${state.balance.toFixed(3)} GRK</b></p>
-      <button onclick="deposit()">➕ Пополнить</button>
-      <button class="small" onclick="withdraw()">➖ Вывести</button>
+      <h3>💰 Баланс</h3>
+      <p>Доступно: <b>${state.balance.toFixed(2)} GRK</b></p>
+      <button onclick="withdraw()">➖ Вывести</button>
+      <button class="small" onclick="deposit()">➕ Пополнить</button>
     `;
   }
 
-  /* ===== SHOP ===== */
   if (screen === "shop") {
     let html = `<h3>🛒 Видеокарты</h3>`;
-
-    shopItems.forEach((item, index) => {
-      const income = item.hash * HASH_TO_GRK;
-
+    shopItems.forEach((item, i) => {
       html += `
         <div class="shop-card">
           <h4>${item.name}</h4>
           <p>💰 Цена: ${item.price} GRK</p>
-          <p>⚡ Hash Power: +${item.hash}</p>
-          <p>📈 Доход: +${income.toFixed(3)} GRK / сек</p>
-          <button onclick="buy(${index})">Купить</button>
+          <p>📈 Доход: ${item.incomePerSec.toFixed(4)} GRK / сек</p>
+          <p>⏱ Окупаемость: 15 дней</p>
+          <button onclick="buy(${i})">Купить</button>
         </div>
       `;
     });
-
     s.innerHTML = html;
   }
 
-  /* ===== ADS ===== */
   if (screen === "ads") {
+    checkAdDay();
     s.innerHTML = `
       <h3>📺 Реклама</h3>
-      <p>Просмотрено: ${state.adsWatched}</p>
+      <p>Сегодня просмотрено: ${state.adsToday} / ${ADS_LIMIT}</p>
       <button onclick="watchAd()">Смотреть рекламу</button>
-    `;
-  }
-
-  /* ===== ACCOUNT ===== */
-  if (screen === "account") {
-    s.innerHTML = `
-      <h3>👤 Аккаунт</h3>
-      <p>Ник: <b>${username}</b></p>
-      <p>⚡ Hash Power: ${state.hash.toFixed(3)}</p>
-      <p>💰 Всего заработано: ${state.totalEarned.toFixed(3)} GRK</p>
-      <p>📺 Просмотров рекламы: ${state.adsWatched}</p>
     `;
   }
 }
 
-/* ======================
+/* =====================
    ACTIONS
-====================== */
+===================== */
 function buy(index) {
   const item = shopItems[index];
-
   if (state.balance >= item.price) {
     state.balance -= item.price;
-    state.hash += item.hash;
+    state.cards.push(item);
     save();
     renderStats();
   } else {
@@ -141,24 +141,38 @@ function buy(index) {
   }
 }
 
+function checkAdDay() {
+  const today = new Date().toDateString();
+  if (state.lastAdDay !== today) {
+    state.lastAdDay = today;
+    state.adsToday = 0;
+  }
+}
+
 function watchAd() {
-  state.hash += 0.02; // временно
-  state.adsWatched++;
+  checkAdDay();
+  if (state.adsToday >= ADS_LIMIT) {
+    alert("Лимит рекламы на сегодня исчерпан");
+    return;
+  }
+
+  state.adsToday++;
+  state.balance += GRK_PER_AD;
   save();
   renderStats();
   openScreen("ads", document.querySelectorAll(".bottom-nav button")[2]);
 }
 
-function deposit() {
-  alert("Пополнение через TON Wallet (в разработке)");
-}
-
 function withdraw() {
-  alert("Вывод через TON Wallet (в разработке)");
+  alert("Вывод через TON Wallet (будет позже)");
 }
 
-/* ======================
+function deposit() {
+  alert("Пополнение через TON Wallet (будет позже)");
+}
+
+/* =====================
    START
-====================== */
+===================== */
 renderStats();
 openScreen("balance", document.querySelector(".bottom-nav button.active"));
