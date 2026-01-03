@@ -1,15 +1,15 @@
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
-/* ========= CONSTANTS ========= */
+/* ====== НАСТРОЙКИ ====== */
 const GRK_PER_AD = 15;
 const ADS_LIMIT = 20;
 const AD_WATCH_TIME = 10;
 const AD_COOLDOWN = 10;
 const CONTRACT_DAYS = 15;
 
-/* ========= STATE ========= */
-let state = JSON.parse(localStorage.getItem("grokGame_v4")) || {
+/* ====== СОСТОЯНИЕ ====== */
+let state = JSON.parse(localStorage.getItem("grokGame_final")) || {
   balance: 0,
   contracts: [],
   adsToday: 0,
@@ -20,57 +20,38 @@ let state = JSON.parse(localStorage.getItem("grokGame_v4")) || {
 let adInProgress = false;
 let adValid = true;
 
-/* ========= USER ========= */
+/* ====== ПОЛЬЗОВАТЕЛЬ ====== */
 const user = tg?.initDataUnsafe?.user || {};
 document.getElementById("username").innerText =
   user.username || user.first_name || "Player";
 
-/* ========= SHOP ========= */
+/* ====== МАГАЗИН ====== */
 const shopItems = [
-  { name: "GTX 1050", price: 1000, percent: 0.20 },
-  { name: "GTX 1660", price: 3000, percent: 0.25 },
-  { name: "RTX 3060", price: 8000, percent: 0.30 },
-  { name: "RTX 4090", price: 30000, percent: 0.35 }
+  { name: "GTX 1050", price: 100, percent: 0.20 },
+  { name: "GTX 1660", price: 300, percent: 0.25 },
+  { name: "RTX 3060", price: 800, percent: 0.30 },
+  { name: "RTX 4090", price: 3000, percent: 0.35 }
 ];
 
-/* ========= MAIN LOOP ========= */
-setInterval(() => {
-  const now = Date.now();
-  let income = 0;
-
-  state.contracts = state.contracts.filter(c => {
-    if (now >= c.end) return false;
-    income += c.income;
-    return true;
-  });
-
-  if (income > 0) {
-    state.balance += income;
-    save();
-    renderHeader();
-    renderHome();
-  }
-}, 1000);
-
-/* ========= ANTIBOT ========= */
+/* ====== АНТИБОТ ====== */
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") adValid = false;
 });
 window.addEventListener("blur", () => adValid = false);
 
-/* ========= SAVE ========= */
+/* ====== СОХРАНЕНИЕ ====== */
 function save() {
-  localStorage.setItem("grokGame_v4", JSON.stringify(state));
+  localStorage.setItem("grokGame_final", JSON.stringify(state));
 }
 
-/* ========= HEADER ========= */
+/* ====== ХЕДЕР ====== */
 function renderHeader() {
   const income = state.contracts.reduce((s, c) => s + c.income, 0);
   document.getElementById("balance").innerText = state.balance.toFixed(2);
   document.getElementById("income").innerText = income.toFixed(4);
 }
 
-/* ========= NAV ========= */
+/* ====== НАВИГАЦИЯ ====== */
 function openScreen(screen, btn) {
   document.querySelectorAll(".bottom-nav button")
     .forEach(b => b.classList.remove("active"));
@@ -85,12 +66,10 @@ function openScreen(screen, btn) {
   if (screen === "refs") renderRefs();
 }
 
-/* ========= SCREENS ========= */
+/* ====== ЭКРАНЫ ====== */
 function renderHome() {
-  const s = document.getElementById("screen");
   const income = state.contracts.reduce((s, c) => s + c.income, 0);
-
-  s.innerHTML = `
+  document.getElementById("screen").innerHTML = `
     <div class="main-card">
       <h2>${state.balance.toFixed(2)} GRK</h2>
       <p>Доход: ${income.toFixed(4)} GRK / сек</p>
@@ -99,54 +78,48 @@ function renderHome() {
 }
 
 function renderShop() {
-  const s = document.getElementById("screen");
-  s.innerHTML = `<h3>🛒 Магазин</h3>` +
+  document.getElementById("screen").innerHTML =
+    `<h3>🛒 Инвестиции</h3>` +
     shopItems.map((i, idx) => `
       <div class="shop-card">
         <h4>${i.name}</h4>
         <p>Цена: ${i.price} GRK</p>
         <p>Прибыль: +${(i.price * i.percent).toFixed(0)} GRK за 15 дней</p>
-        <button onclick="buy(${idx})">Купить</button>
+        <button onclick="buy(${idx})">Инвестировать</button>
       </div>
     `).join("");
 }
 
 function renderTasks() {
   checkAdDay();
-  const s = document.getElementById("screen");
-
-  s.innerHTML = `
+  document.getElementById("screen").innerHTML = `
     <h3>📋 Задания</h3>
-    <p>📺 Смотреть рекламу (${state.adsToday}/${ADS_LIMIT})</p>
+    <p>Реклама: ${state.adsToday}/${ADS_LIMIT}</p>
 
     <div class="ad-timer">
       <svg width="120" height="120">
         <circle cx="60" cy="60" r="54" stroke="#222" stroke-width="8" fill="none"/>
-        <circle id="adCircle"
-          cx="60" cy="60" r="54"
-          stroke="#4fd1ff" stroke-width="8"
-          fill="none"
-          stroke-dasharray="339"
-          stroke-dashoffset="339"/>
+        <circle id="adCircle" cx="60" cy="60" r="54"
+          stroke="#4deeea" stroke-width="8" fill="none"
+          stroke-dasharray="339" stroke-dashoffset="339"/>
       </svg>
       <div id="adText">Готово</div>
     </div>
 
     <button id="adBtn" onclick="watchAd()">Смотреть рекламу</button>
-    <div id="adLog" style="margin-top:10px;opacity:.7"></div>
+    <div id="adLog"></div>
   `;
 }
 
 function renderRefs() {
-  const s = document.getElementById("screen");
-  s.innerHTML = `
+  document.getElementById("screen").innerHTML = `
     <h3>👥 Рефералы</h3>
-    <p>Приглашай друзей и зарабатывай</p>
+    <p>5% с вывода рефералов</p>
     <code>https://t.me/yourbot?start=${state.referralId}</code>
   `;
 }
 
-/* ========= ACTIONS ========= */
+/* ====== ДЕЙСТВИЯ ====== */
 function buy(i) {
   const it = shopItems[i];
   if (state.balance < it.price) return alert("Недостаточно GRK");
@@ -156,21 +129,18 @@ function buy(i) {
 
   state.balance -= it.price;
   state.contracts.push({
-    name: it.name,
-    start: Date.now(),
     end: Date.now() + CONTRACT_DAYS * 86400000,
     income
   });
 
   save();
   renderHeader();
-  openScreen("home", document.querySelectorAll(".bottom-nav button")[0]);
+  openScreen("home", document.querySelector(".bottom-nav button"));
 }
 
-/* ========= ADS ========= */
+/* ====== РЕКЛАМА ====== */
 function watchAd() {
-  if (adInProgress) return;
-  if (state.adsToday >= ADS_LIMIT) return alert("Лимит рекламы");
+  if (adInProgress || state.adsToday >= ADS_LIMIT) return;
 
   adInProgress = true;
   adValid = true;
@@ -204,7 +174,7 @@ function watchAd() {
       save();
       renderHeader();
 
-      log.innerText = "✅ Спасибо за просмотр рекламы!";
+      log.innerText = "✅ Спасибо за просмотр!";
       startCooldown(btn, text, circle);
     }
   }, 1000);
@@ -214,11 +184,11 @@ function startCooldown(btn, text, circle) {
   let cd = AD_COOLDOWN;
   text.innerText = `⏳ ${cd}s`;
 
-  const timer = setInterval(() => {
+  const t = setInterval(() => {
     cd--;
     text.innerText = `⏳ ${cd}s`;
     if (cd <= 0) {
-      clearInterval(timer);
+      clearInterval(t);
       resetAd(btn, text, circle);
     }
   }, 1000);
@@ -239,6 +209,6 @@ function checkAdDay() {
   }
 }
 
-/* ========= START ========= */
+/* ====== СТАРТ ====== */
 renderHeader();
-openScreen("home", document.querySelectorAll(".bottom-nav button")[0]);
+openScreen("home", document.querySelector(".bottom-nav button"));
