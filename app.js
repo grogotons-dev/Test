@@ -22,15 +22,26 @@ const username =
 document.getElementById("username").innerText = username;
 
 /* ======================
-   CONSTANTS (временно)
+   CONSTANTS
 ====================== */
-const HASH_COEF = 0.1;
+const HASH_TO_GRK = 0.1; // 1 Hash = 0.1 GRK / sec
+
+/* ======================
+   SHOP DATA
+====================== */
+const shopItems = [
+  { name: "GTX 1050", price: 100, hash: 0.1 },
+  { name: "GTX 1660", price: 300, hash: 0.3 },
+  { name: "RTX 3060", price: 800, hash: 1.0 },
+  { name: "RTX 3080", price: 2500, hash: 4.0 },
+  { name: "RTX 4090", price: 8000, hash: 12.0 }
+];
 
 /* ======================
    GAME LOOP
 ====================== */
 setInterval(() => {
-  const income = state.hash * HASH_COEF;
+  const income = state.hash * HASH_TO_GRK;
   state.balance += income;
   state.totalEarned += income;
   save();
@@ -48,7 +59,7 @@ function renderStats() {
   document.getElementById("balance").innerText = state.balance.toFixed(3);
   document.getElementById("hash").innerText = state.hash.toFixed(3);
   document.getElementById("income").innerText =
-    (state.hash * HASH_COEF).toFixed(3);
+    (state.hash * HASH_TO_GRK).toFixed(3);
 }
 
 /* ======================
@@ -67,26 +78,30 @@ function openScreen(screen, btn) {
     s.innerHTML = `
       <h3>💰 Баланс Grok</h3>
       <p>Доступно: <b>${state.balance.toFixed(3)} GRK</b></p>
-
       <button onclick="deposit()">➕ Пополнить</button>
       <button class="small" onclick="withdraw()">➖ Вывести</button>
-
-      <p style="margin-top:12px; font-size:13px; opacity:0.8;">
-        Вывод и пополнение работают через TON (в разработке)
-      </p>
     `;
   }
 
   /* ===== SHOP ===== */
   if (screen === "shop") {
-    s.innerHTML = `
-      <h3>🛒 Видеокарты</h3>
-      <button onclick="buy(100, 0.1)">GTX 1050 — +0.1 Hash</button>
-      <button onclick="buy(300, 0.3)">GTX 1660 — +0.3 Hash</button>
-      <button onclick="buy(800, 1)">RTX 3060 — +1 Hash</button>
-      <button onclick="buy(2500, 4)">RTX 3080 — +4 Hash</button>
-      <button onclick="buy(8000, 12)">RTX 4090 — +12 Hash</button>
-    `;
+    let html = `<h3>🛒 Видеокарты</h3>`;
+
+    shopItems.forEach((item, index) => {
+      const income = item.hash * HASH_TO_GRK;
+
+      html += `
+        <div class="shop-card">
+          <h4>${item.name}</h4>
+          <p>💰 Цена: ${item.price} GRK</p>
+          <p>⚡ Hash Power: +${item.hash}</p>
+          <p>📈 Доход: +${income.toFixed(3)} GRK / сек</p>
+          <button onclick="buy(${index})">Купить</button>
+        </div>
+      `;
+    });
+
+    s.innerHTML = html;
   }
 
   /* ===== ADS ===== */
@@ -113,10 +128,12 @@ function openScreen(screen, btn) {
 /* ======================
    ACTIONS
 ====================== */
-function buy(price, hash) {
-  if (state.balance >= price) {
-    state.balance -= price;
-    state.hash += hash;
+function buy(index) {
+  const item = shopItems[index];
+
+  if (state.balance >= item.price) {
+    state.balance -= item.price;
+    state.hash += item.hash;
     save();
     renderStats();
   } else {
@@ -133,11 +150,11 @@ function watchAd() {
 }
 
 function deposit() {
-  alert("Пополнение через TON Wallet (будет подключено)");
+  alert("Пополнение через TON Wallet (в разработке)");
 }
 
 function withdraw() {
-  alert("Вывод доступен при минимальной сумме (будет подключено)");
+  alert("Вывод через TON Wallet (в разработке)");
 }
 
 /* ======================
