@@ -2,109 +2,165 @@
   box-sizing: border-box;
 }
 
+/* ======= FIX TELEGRAM BLACK AREA ======= */
 html, body {
+  width: 100%;
+  min-height: 100%;
+  background-color: #05070d;
+}
+
+body {
   margin: 0;
-  min-height: 100vh;
   font-family: system-ui, sans-serif;
   color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+
   background:
     radial-gradient(1200px 600px at 20% -10%, rgba(34,197,94,0.18), transparent 60%),
     radial-gradient(900px 500px at 80% 10%, rgba(59,130,246,0.22), transparent 60%),
-    linear-gradient(180deg, #05070d, #0b1220);
+    radial-gradient(700px 400px at 50% 100%, rgba(250,204,21,0.12), transparent 60%),
+    linear-gradient(180deg, #05070d 0%, #0b1220 50%, #05070d 100%);
+
+  background-attachment: fixed;
 }
 
+/* дополнительный слой, чтобы фон ВСЕГДА был на весь экран */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(600px 300px at 50% 50%, rgba(59,130,246,0.08), transparent 70%);
+  animation: bgMove 14s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes bgMove {
+  from { transform: translateY(-20px); }
+  to   { transform: translateY(20px); }
+}
+
+/* ======= APP ======= */
 .app {
+  min-height: 100vh;
   padding: 16px;
-  padding-bottom: 140px;
+  padding-bottom: 140px; /* место под нижнее меню */
 }
 
+/* ======= GLASS ======= */
 .glass {
   background: rgba(255,255,255,0.06);
   backdrop-filter: blur(16px);
-  border-radius: 24px;
-  padding: 20px;
+  border-radius: 22px;
+  padding: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.6);
 }
 
-/* ===== HEADER ===== */
-.stats-row {
+header {
+  margin-bottom: 16px;
+}
+
+/* ======= STATS ======= */
+.stats {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
-.balance-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.coin-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #22c55e, #3b82f6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
-.balance-value {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.income-box {
+.balance, .income {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.income {
   color: #22c55e;
-  font-weight: 600;
+  animation: pulse 2s infinite;
 }
 
-.speed-icon {
-  width: 20px;
-  height: 20px;
-  stroke: #22c55e;
-  fill: none;
-  stroke-width: 2;
+@keyframes pulse {
+  0%   { text-shadow: 0 0 6px #22c55e; }
+  50%  { text-shadow: 0 0 14px #22c55e; }
+  100% { text-shadow: 0 0 6px #22c55e; }
 }
 
-.income-text {
-  white-space: nowrap;
+/* ======= MAIN ======= */
+.main-card {
+  text-align: center;
+  padding: 20px;
 }
 
-/* ===== NAV ===== */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* ======= BUTTONS ======= */
+button {
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #22c55e, #3b82f6);
+  color: #000;
+  font-weight: 700;
+}
+
+button.secondary {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+/* ======= SHOP ======= */
+.shop-card {
+  background: linear-gradient(
+    160deg,
+    rgba(34,197,94,0.08),
+    rgba(0,0,0,0.5)
+  );
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 18px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+/* ======= BOTTOM NAV ======= */
 .bottom-nav {
   position: fixed;
   bottom: 10px;
   left: 10px;
   right: 10px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  z-index: 10;
 }
 
 .bottom-nav button {
   flex: 1;
-  padding: 12px 0;
-  border-radius: 18px;
   background: rgba(255,255,255,0.08);
-  border: none;
   color: #fff;
+  font-size: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
 }
 
+/* ======= ICONS ======= */
 .icon {
   width: 26px;
   height: 26px;
   stroke: #22c55e;
   fill: none;
   stroke-width: 1.75;
+  filter: drop-shadow(0 0 6px rgba(34,197,94,0.6));
+  transition: 0.25s;
 }
 
 .bottom-nav .active {
@@ -117,5 +173,5 @@ html, body {
   filter:
     drop-shadow(0 0 8px #facc15)
     drop-shadow(0 0 18px rgba(250,204,21,0.8));
-  transform: scale(1.15);
+  transform: scale(1.2);
 }
