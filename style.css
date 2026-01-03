@@ -2,20 +2,30 @@
   box-sizing: border-box;
 }
 
-/* ======= CRYPTO / MINING BACKGROUND ======= */
+/* ======= FIX TELEGRAM BLACK AREA ======= */
+html, body {
+  width: 100%;
+  min-height: 100%;
+  background-color: #05070d;
+}
+
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
   color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
 
   background:
     radial-gradient(1200px 600px at 20% -10%, rgba(34,197,94,0.18), transparent 60%),
     radial-gradient(900px 500px at 80% 10%, rgba(59,130,246,0.22), transparent 60%),
     radial-gradient(700px 400px at 50% 100%, rgba(250,204,21,0.12), transparent 60%),
     linear-gradient(180deg, #05070d 0%, #0b1220 50%, #05070d 100%);
+
+  background-attachment: fixed;
 }
 
-/* лёгкое «дыхание» фона — НЕ трогает ячейки */
+/* дополнительный слой, чтобы фон ВСЕГДА был на весь экран */
 body::before {
   content: "";
   position: fixed;
@@ -34,11 +44,12 @@ body::before {
 
 /* ======= APP ======= */
 .app {
+  min-height: 100vh;
   padding: 16px;
-  padding-bottom: 120px;
+  padding-bottom: 140px; /* место под нижнее меню */
 }
 
-/* ======= GLASS CARDS ======= */
+/* ======= GLASS ======= */
 .glass {
   background: rgba(255,255,255,0.06);
   backdrop-filter: blur(16px);
@@ -106,7 +117,7 @@ button:disabled {
   opacity: 0.5;
 }
 
-/* ======= SHOP CARDS ======= */
+/* ======= SHOP ======= */
 .shop-card {
   background: linear-gradient(
     160deg,
@@ -127,6 +138,7 @@ button:disabled {
   right: 10px;
   display: flex;
   gap: 8px;
+  z-index: 10;
 }
 
 .bottom-nav button {
@@ -151,15 +163,6 @@ button:disabled {
   transition: 0.25s;
 }
 
-.mini-icon {
-  width: 18px;
-  height: 18px;
-  stroke: #facc15;
-  fill: none;
-  stroke-width: 1.75;
-}
-
-/* ======= ACTIVE TAB ======= */
 .bottom-nav .active {
   background: linear-gradient(135deg, #22c55e, #3b82f6);
   color: #000;
