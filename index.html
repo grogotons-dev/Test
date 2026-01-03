@@ -2,51 +2,31 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Grok Mining</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grok Invest</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div id="app">
-
-  <!-- HEADER -->
-  <header class="header">
-    <div class="title">Grok Mining</div>
-    <div class="user" id="username">Player</div>
+<div class="app">
+  <header class="glass">
+    <h2 id="username">Player</h2>
+    <div class="stats">
+      <div>💰 Баланс: <b><span id="balance">0</span> GRK</b></div>
+      <div class="income">📈 Доход: <span id="income">0</span> GRK / сек</div>
+    </div>
   </header>
 
-  <!-- MAIN -->
-  <main id="screen-main" class="screen active">
-    <div class="card">
-      <div class="label">Баланс</div>
-      <div class="value" id="balance">0.0000 TON</div>
-    </div>
-  </main>
-
-  <!-- REFERRALS -->
-  <main id="screen-referrals" class="screen">
-    <div class="card">
-      <div class="label">Твоя реферальная ссылка</div>
-      <input id="refLink" readonly />
-      <button onclick="copyRef()">Скопировать</button>
-      <button onclick="shareRef()">Поделиться</button>
-    </div>
-
-    <div class="card">
-      <div class="label">Доход от рефералов</div>
-      <div class="value" id="refIncome">0.0000 TON</div>
-    </div>
-  </main>
-
-  <!-- NAV -->
-  <nav class="nav">
-    <button onclick="showScreen('main')">🏠</button>
-    <button onclick="showScreen('referrals')">👥</button>
-  </nav>
-
+  <main id="screen" class="glass"></main>
 </div>
 
-<script src="app.js"></script>
+<nav class="bottom-nav">
+  <button class="active" onclick="openScreen('home', this)">🏠<span>Главная</span></button>
+  <button onclick="openScreen('shop', this)">🛒<span>Магазин</span></button>
+  <button onclick="openScreen('tasks', this)">📋<span>Задания</span></button>
+  <button onclick="openScreen('refs', this)">👥<span>Рефералы</span></button>
+</nav>
+
+<script src="app.js?v=ECONOMY_FINAL_1"></script>
 </body>
 </html>
