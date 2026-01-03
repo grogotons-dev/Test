@@ -1,13 +1,13 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
 
-/* ===== CONSTANTS ===== */
+/* ========= CONSTANTS ========= */
 const GRK_PER_AD = 15;
 const ADS_LIMIT = 20;
 const AD_COOLDOWN = 20;
 const CONTRACT_DAYS = 15;
 
-/* ===== STATE ===== */
+/* ========= STATE ========= */
 let state = JSON.parse(localStorage.getItem("grokGame")) || {
   balance: 0,
   contracts: [],
@@ -17,12 +17,12 @@ let state = JSON.parse(localStorage.getItem("grokGame")) || {
   referralId: Math.random().toString(36).slice(2, 10)
 };
 
-/* ===== USER ===== */
-const user = tg.initDataUnsafe?.user || {};
+/* ========= USER ========= */
+const user = tg?.initDataUnsafe?.user || {};
 document.getElementById("username").innerText =
-  user.username || user.first_name || "Guest";
+  user.username || user.first_name || "Player";
 
-/* ===== SHOP ===== */
+/* ========= SHOP ========= */
 const shopItems = [
   { name: "GTX 1050", price: 1000, percent: 0.20 },
   { name: "GTX 1660", price: 3000, percent: 0.25 },
@@ -30,7 +30,7 @@ const shopItems = [
   { name: "RTX 4090", price: 30000, percent: 0.35 }
 ];
 
-/* ===== LOOP ===== */
+/* ========= LOOP ========= */
 setInterval(() => {
   const now = Date.now();
   let income = 0;
@@ -46,71 +46,85 @@ setInterval(() => {
   renderStats();
 }, 1000);
 
-/* ===== RENDER ===== */
-function renderStats() {
-  const income = state.contracts.reduce((s,c)=>s+c.income,0);
-  balance.innerText = state.balance.toFixed(2);
-  document.getElementById("income").innerText = income.toFixed(4);
-}
-
+/* ========= SAVE / RENDER ========= */
 function save() {
   localStorage.setItem("grokGame", JSON.stringify(state));
 }
 
-/* ===== NAV ===== */
+function renderStats() {
+  const income = state.contracts.reduce((s, c) => s + c.income, 0);
+  document.getElementById("balance").innerText = state.balance.toFixed(2);
+  document.getElementById("income").innerText = income.toFixed(4);
+}
+
+/* ========= NAV ========= */
 function openScreen(screen, btn) {
-  document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
+  document.querySelectorAll(".bottom-nav button")
+    .forEach(b => b.classList.remove("active"));
+
+  if (btn) btn.classList.add("active");
 
   const s = document.getElementById("screen");
+  s.innerHTML = "";
 
-  if (screen === "ads") {
-    const cd = Math.max(0, AD_COOLDOWN - Math.floor((Date.now()-state.lastAdTime)/1000));
-    s.innerHTML = `
-      <h3>📺 Реклама</h3>
-      <p>${state.adsToday}/${ADS_LIMIT}</p>
-      <button ${cd>0?"disabled":""} onclick="watchAd()">Смотреть</button>
-      <div class="progress"><div class="progress-bar" id="adBar"></div></div>
-    `;
-    startAdBar(cd);
+  if (screen === "balance") {
+    s.innerHTML = `<h3>💰 Баланс</h3>
+      <p><b>${state.balance.toFixed(2)} GRK</b></p>`;
   }
 
   if (screen === "shop") {
     s.innerHTML = `<h3>🛒 Инвестиции</h3>` +
-      shopItems.map((i,idx)=>`
+      shopItems.map((i, idx) => `
         <div class="shop-card">
           <h4>${i.name}</h4>
           <p>Цена: ${i.price} GRK</p>
-          <p>Доход: +${i.price*i.percent} GRK</p>
+          <p>Доход: +${(i.price * i.percent).toFixed(0)} GRK</p>
+          <p>Срок: 15 дней</p>
           <button onclick="buy(${idx})">Инвестировать</button>
         </div>
       `).join("");
   }
 
+  if (screen === "ads") {
+    checkAdDay();
+    const cd = Math.max(0, AD_COOLDOWN - Math.floor((Date.now() - state.lastAdTime) / 1000));
+
+    s.innerHTML = `
+      <h3>📺 Реклама</h3>
+      <p>${state.adsToday} / ${ADS_LIMIT}</p>
+      <button ${cd > 0 ? "disabled" : ""} onclick="watchAd()">Смотреть рекламу</button>
+      <div class="progress">
+        <div class="progress-bar" id="adBar"></div>
+      </div>
+    `;
+
+    startAdBar(cd);
+  }
+
   if (screen === "portfolio") {
     s.innerHTML = `
       <h3>👥 Мои инвестиции</h3>
-      ${state.contracts.map(c=>{
-        const progress = ((Date.now()-c.start)/(c.end-c.start))*100;
+      ${state.contracts.length === 0 ? "<p>Нет активных контрактов</p>" : ""}
+      ${state.contracts.map(c => {
+        const progress = Math.min(100, ((Date.now() - c.start) / (c.end - c.start)) * 100);
         return `
           <div class="contract-card">
             <b>${c.name}</b>
-            <div class="progress"><div class="progress-bar" style="width:${progress}%"></div></div>
+            <p>Доход: ${c.income.toFixed(4)} GRK / сек</p>
+            <div class="progress">
+              <div class="progress-bar" style="width:${progress}%"></div>
+            </div>
           </div>
         `;
       }).join("")}
-      <h4>🔗 Рефералы</h4>
-      <p>Твоя ссылка:</p>
+
+      <h4>🔗 Реферальная ссылка</h4>
       <code>https://t.me/yourbot?start=${state.referralId}</code>
     `;
   }
-
-  if (screen === "balance") {
-    s.innerHTML = `<h3>💰 Баланс</h3><p>${state.balance.toFixed(2)} GRK</p>`;
-  }
 }
 
-/* ===== ACTIONS ===== */
+/* ========= ACTIONS ========= */
 function buy(i) {
   const it = shopItems[i];
   if (state.balance < it.price) return alert("Недостаточно GRK");
@@ -122,19 +136,30 @@ function buy(i) {
   state.contracts.push({
     name: it.name,
     start: Date.now(),
-    end: Date.now() + CONTRACT_DAYS*86400000,
+    end: Date.now() + CONTRACT_DAYS * 86400000,
     income
   });
 
   save();
   renderStats();
+  openScreen("portfolio", document.querySelectorAll(".bottom-nav button")[3]);
+}
+
+function checkAdDay() {
+  const today = new Date().toDateString();
+  if (state.lastAdDay !== today) {
+    state.lastAdDay = today;
+    state.adsToday = 0;
+  }
 }
 
 function watchAd() {
   if (state.adsToday >= ADS_LIMIT) return alert("Лимит рекламы");
+
   state.adsToday++;
   state.lastAdTime = Date.now();
   state.balance += GRK_PER_AD;
+
   save();
   renderStats();
   openScreen("ads", document.querySelectorAll(".bottom-nav button")[2]);
@@ -143,14 +168,17 @@ function watchAd() {
 function startAdBar(cd) {
   const bar = document.getElementById("adBar");
   if (!bar) return;
+
   let left = cd;
-  const t = setInterval(()=>{
+  bar.style.width = "0%";
+
+  const timer = setInterval(() => {
     left--;
-    bar.style.width = ((AD_COOLDOWN-left)/AD_COOLDOWN)*100+"%";
-    if (left<=0) clearInterval(t);
-  },1000);
+    bar.style.width = ((AD_COOLDOWN - left) / AD_COOLDOWN) * 100 + "%";
+    if (left <= 0) clearInterval(timer);
+  }, 1000);
 }
 
-/* ===== START ===== */
+/* ========= START ========= */
 renderStats();
-openScreen("balance", document.querySelector(".bottom-nav button.active"));
+openScreen("balance", document.querySelector(".bottom-nav button"));
