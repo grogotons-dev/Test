@@ -1,0 +1,66 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(160deg, #050505, #0d0d0d);
+  font-family: Arial, sans-serif;
+  color: #ffffff;
+}
+
+.app {
+  padding: 16px;
+  padding-bottom: 80px;
+}
+
+header {
+  background: #111;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 0 20px rgba(0,255,255,0.05);
+}
+
+.stats div {
+  margin-top: 6px;
+}
+
+main {
+  background: #0f0f0f;
+  border-radius: 14px;
+  padding: 16px;
+  min-height: 180px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #00ffff;
+  color: #000;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  background: #000;
+  border-top: 1px solid #222;
+}
+
+.nav button {
+  flex: 1;
+  background: none;
+  color: #00ffff;
+  font-size: 18px;
+}
