@@ -9,64 +9,57 @@
 <body>
 
 <div class="app">
-  <header class="glass">
+  <header class="glass header-card">
     <h2 id="username">Player</h2>
-    <div class="stats">
-      <div class="balance">
-        <svg class="mini-icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="9"/>
-          <path d="M8 12h8M12 8v8"/>
-        </svg>
-        <b><span id="balance">0</span> GRK</b>
+
+    <div class="stats-row">
+      <div class="balance-box">
+        <div class="coin-icon">◈</div>
+        <div>
+          <div class="balance-value"><span id="balance">300.00</span> GRK</div>
+        </div>
       </div>
-      <div class="income">
-        <svg class="mini-icon" viewBox="0 0 24 24">
+
+      <div class="income-box">
+        <svg class="speed-icon" viewBox="0 0 24 24">
           <path d="M3 17l6-6 4 4 7-7"/>
         </svg>
-        <span id="income">0</span> GRK / сек
+        <div class="income-text">
+          <span id="income">0.0000</span> GRK / сек
+        </div>
       </div>
     </div>
   </header>
 
-  <main id="screen" class="glass"></main>
+  <main id="screen" class="glass main-card">
+    <h1>300.00 GRK</h1>
+    <p>Доход: 0.0000 GRK / сек</p>
+
+    <div class="actions">
+      <button class="btn-deposit">⬆ Пополнить</button>
+      <button class="btn-withdraw">⬇ Вывести</button>
+    </div>
+  </main>
 </div>
 
 <nav class="bottom-nav">
-  <button class="active" onclick="openScreen('home', this)">
-    <svg class="icon" viewBox="0 0 24 24">
-      <path d="M12 2 3 9l9 13 9-13-9-7Z"/>
-    </svg>
+  <button class="active">
+    <span class="nav-icon">◈</span>
     <span>Главная</span>
   </button>
-
-  <button onclick="openScreen('shop', this)">
-    <svg class="icon" viewBox="0 0 24 24">
-      <rect x="4" y="6" width="16" height="12" rx="2"/>
-      <circle cx="9" cy="12" r="2"/>
-      <circle cx="15" cy="12" r="2"/>
-    </svg>
+  <button>
+    <span class="nav-icon">⛏</span>
     <span>Магазин</span>
   </button>
-
-  <button onclick="openScreen('tasks', this)">
-    <svg class="icon" viewBox="0 0 24 24">
-      <rect x="5" y="3" width="14" height="18" rx="2"/>
-      <path d="M9 9h6M9 13h6M9 17h4"/>
-    </svg>
+  <button>
+    <span class="nav-icon">📄</span>
     <span>Задания</span>
   </button>
-
-  <button onclick="openScreen('refs', this)">
-    <svg class="icon" viewBox="0 0 24 24">
-      <circle cx="12" cy="8" r="3"/>
-      <circle cx="6" cy="16" r="3"/>
-      <circle cx="18" cy="16" r="3"/>
-      <path d="M9 10l-2 3M15 10l2 3"/>
-    </svg>
+  <button>
+    <span class="nav-icon">🔗</span>
     <span>Рефералы</span>
   </button>
 </nav>
 
-<script src="app.js"></script>
 </body>
 </html>
