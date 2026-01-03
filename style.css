@@ -11,7 +11,7 @@ body {
 
 .app {
   padding: 16px;
-  padding-bottom: 110px;
+  padding-bottom: 120px;
 }
 
 .glass {
@@ -32,6 +32,16 @@ header {
   margin-top: 4px;
 }
 
+.main-card {
+  text-align: center;
+  padding: 24px 12px;
+}
+
+.main-card h2 {
+  font-size: 32px;
+  margin: 0;
+}
+
 button {
   width: 100%;
   padding: 14px;
@@ -48,27 +58,31 @@ button:disabled {
   opacity: 0.5;
 }
 
-.shop-card,
-.contract-card {
+.shop-card {
   background: rgba(255,255,255,0.07);
   border-radius: 18px;
   padding: 14px;
   margin-top: 14px;
 }
 
-.progress {
-  background: rgba(255,255,255,0.15);
-  border-radius: 10px;
-  height: 10px;
-  overflow: hidden;
-  margin-top: 8px;
+.ad-timer {
+  margin: 20px auto;
+  width: 120px;
+  height: 120px;
+  position: relative;
 }
 
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #4deeea, #6a7cff);
-  width: 0%;
-  transition: width 0.5s linear;
+.ad-timer svg {
+  transform: rotate(-90deg);
+}
+
+#adText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
 .bottom-nav {
@@ -85,13 +99,12 @@ button:disabled {
   background: rgba(255,255,255,0.1);
   color: #fff;
   font-size: 22px;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .bottom-nav span {
   display: block;
   font-size: 12px;
-  margin-top: 2px;
 }
 
 .bottom-nav .active {
