@@ -42,6 +42,38 @@ body::before {
   to   { transform: translateY(20px); }
 }
 
+/* ======= АНИМАЦИИ ДЛЯ ЭФФЕКТОВ ======= */
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -100px) scale(1.5);
+  }
+}
+
+@keyframes pulse {
+  0%   { text-shadow: 0 0 6px #22c55e; }
+  50%  { text-shadow: 0 0 14px #22c55e; }
+  100% { text-shadow: 0 0 6px #22c55e; }
+}
+
+@keyframes ambientPulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.3; }
+}
+
+@keyframes vibration {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-1px); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(1px); }
+  100% { transform: translateX(0); }
+}
+
 /* ======= APP ======= */
 .app {
   min-height: 100vh;
@@ -80,12 +112,6 @@ header {
   animation: pulse 2s infinite;
 }
 
-@keyframes pulse {
-  0%   { text-shadow: 0 0 6px #22c55e; }
-  50%  { text-shadow: 0 0 14px #22c55e; }
-  100% { text-shadow: 0 0 6px #22c55e; }
-}
-
 /* ======= MAIN ======= */
 .main-card {
   text-align: center;
@@ -106,6 +132,13 @@ button {
   background: linear-gradient(135deg, #22c55e, #3b82f6);
   color: #000;
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(34,197,94,0.3);
 }
 
 button.secondary {
@@ -115,6 +148,7 @@ button.secondary {
 
 button:disabled {
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ======= SHOP ======= */
@@ -128,6 +162,12 @@ button:disabled {
   border-radius: 18px;
   padding: 14px;
   margin-top: 14px;
+  transition: all 0.3s;
+}
+
+.shop-card:hover {
+  border-color: rgba(34,197,94,0.5);
+  transform: translateY(-2px);
 }
 
 /* ======= BOTTOM NAV ======= */
@@ -174,4 +214,163 @@ button:disabled {
     drop-shadow(0 0 8px #facc15)
     drop-shadow(0 0 18px rgba(250,204,21,0.8));
   transform: scale(1.2);
+}
+
+/* ======= КНОПКИ АУДИО ======= */
+.audio-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+
+.audio-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(34,197,94,0.3);
+  transition: all 0.3s;
+}
+
+.audio-btn:hover {
+  background: rgba(34,197,94,0.2);
+  transform: scale(1.1);
+}
+
+.audio-btn.muted {
+  opacity: 0.5;
+}
+
+.audio-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: #22c55e;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* ======= ИНДИКАТОРЫ АТМОСФЕРЫ ======= */
+.ambient-indicator {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  z-index: 5;
+  opacity: 0.7;
+}
+
+.ambient-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: ambientPulse 2s infinite;
+}
+
+.ambient-dot:nth-child(2) { animation-delay: 0.4s; }
+.ambient-dot:nth-child(3) { animation-delay: 0.8s; }
+.ambient-dot:nth-child(4) { animation-delay: 1.2s; }
+
+/* ======= АКТИВНЫЕ КАРТЫ (вибрация) ======= */
+.contract-active {
+  animation: vibration 0.3s ease-in-out;
+  border-color: #facc15 !important;
+}
+
+/* ======= СТИЛИ ДЛЯ НАСТРОЕК ======= */
+.settings-panel {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 20px;
+  width: 250px;
+  z-index: 99;
+  border: 1px solid rgba(34,197,94,0.3);
+  display: none;
+}
+
+.settings-panel.show {
+  display: block;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slider-container {
+  margin: 15px 0;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #22c55e;
+  cursor: pointer;
+}
+
+/* ======= ПАРТИКЛЫ ======= */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  font-weight: bold;
+  animation: floatUp 1.5s ease-out forwards;
+}
+
+/* ======= РЕСПОНСИВ ======= */
+@media (max-width: 480px) {
+  .audio-controls {
+    top: 10px;
+    right: 10px;
+    gap: 5px;
+  }
+  
+  .audio-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .settings-panel {
+    width: calc(100% - 40px);
+    right: 20px;
+  }
 }
