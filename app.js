@@ -1,16 +1,16 @@
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
-/* ================== CONSTANTS ================== */
+/* ========= CONSTANTS ========= */
 const GRK_PER_AD = 15;
 const ADS_LIMIT = 20;
 const AD_WATCH_TIME = 10;
 const AD_COOLDOWN = 10;
 const CONTRACT_DAYS = 15;
 
-/* ================== STATE ================== */
-let state = JSON.parse(localStorage.getItem("grokGame")) || {
-  balance: 10000,
+/* ========= STATE ========= */
+let state = JSON.parse(localStorage.getItem("grokGame_v4")) || {
+  balance: 0,
   contracts: [],
   adsToday: 0,
   lastAdDay: null,
@@ -20,12 +20,12 @@ let state = JSON.parse(localStorage.getItem("grokGame")) || {
 let adInProgress = false;
 let adValid = true;
 
-/* ================== USER ================== */
+/* ========= USER ========= */
 const user = tg?.initDataUnsafe?.user || {};
 document.getElementById("username").innerText =
   user.username || user.first_name || "Player";
 
-/* ================== SHOP ================== */
+/* ========= SHOP ========= */
 const shopItems = [
   { name: "GTX 1050", price: 1000, percent: 0.20 },
   { name: "GTX 1660", price: 3000, percent: 0.25 },
@@ -33,7 +33,7 @@ const shopItems = [
   { name: "RTX 4090", price: 30000, percent: 0.35 }
 ];
 
-/* ================== MAIN LOOP ================== */
+/* ========= MAIN LOOP ========= */
 setInterval(() => {
   const now = Date.now();
   let income = 0;
@@ -47,41 +47,30 @@ setInterval(() => {
   if (income > 0) {
     state.balance += income;
     save();
-    renderStats();
-    updateBalanceScreen();
+    renderHeader();
+    renderHome();
   }
 }, 1000);
 
-/* ================== VISIBILITY ANTIBOT ================== */
+/* ========= ANTIBOT ========= */
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState !== "visible") {
-    adValid = false;
-  }
+  if (document.visibilityState !== "visible") adValid = false;
 });
+window.addEventListener("blur", () => adValid = false);
 
-window.addEventListener("blur", () => {
-  adValid = false;
-});
-
-/* ================== SAVE ================== */
+/* ========= SAVE ========= */
 function save() {
-  localStorage.setItem("grokGame", JSON.stringify(state));
+  localStorage.setItem("grokGame_v4", JSON.stringify(state));
 }
 
-/* ================== HEADER ================== */
-function renderStats() {
+/* ========= HEADER ========= */
+function renderHeader() {
   const income = state.contracts.reduce((s, c) => s + c.income, 0);
   document.getElementById("balance").innerText = state.balance.toFixed(2);
   document.getElementById("income").innerText = income.toFixed(4);
 }
 
-/* ================== BALANCE SCREEN ================== */
-function updateBalanceScreen() {
-  const el = document.getElementById("balanceScreenValue");
-  if (el) el.innerText = state.balance.toFixed(2) + " GRK";
-}
-
-/* ================== NAV ================== */
+/* ========= NAV ========= */
 function openScreen(screen, btn) {
   document.querySelectorAll(".bottom-nav button")
     .forEach(b => b.classList.remove("active"));
@@ -90,77 +79,74 @@ function openScreen(screen, btn) {
   const s = document.getElementById("screen");
   s.innerHTML = "";
 
-  if (screen === "balance") {
-    s.innerHTML = `
-      <h3>💰 Баланс</h3>
-      <div id="balanceScreenValue" style="font-size:26px;font-weight:bold">
-        ${state.balance.toFixed(2)} GRK
-      </div>
-    `;
-  }
-
-  if (screen === "shop") {
-    s.innerHTML = `<h3>🛒 Инвестиции</h3>` +
-      shopItems.map((i, idx) => `
-        <div class="shop-card">
-          <h4>${i.name}</h4>
-          <p>Цена: ${i.price} GRK</p>
-          <p>Доход: +${(i.price * i.percent).toFixed(0)} GRK за 15 дней</p>
-          <button onclick="buy(${idx})">Инвестировать</button>
-        </div>
-      `).join("");
-  }
-
-  if (screen === "ads") {
-    checkAdDay();
-
-    s.innerHTML = `
-      <h3>📺 Реклама</h3>
-      <p>${state.adsToday} / ${ADS_LIMIT} сегодня</p>
-
-      <div class="ad-timer">
-        <svg width="120" height="120">
-          <circle cx="60" cy="60" r="54"
-            stroke="#222" stroke-width="8" fill="none"/>
-          <circle id="adCircle"
-            cx="60" cy="60" r="54"
-            stroke="#4fd1ff" stroke-width="8"
-            fill="none"
-            stroke-dasharray="339"
-            stroke-dashoffset="339"/>
-        </svg>
-        <div id="adText">Готово</div>
-      </div>
-
-      <button id="adBtn" onclick="watchAd()">Смотреть рекламу</button>
-      <div id="adLog" style="margin-top:10px;opacity:.7"></div>
-    `;
-  }
-
-  if (screen === "portfolio") {
-    s.innerHTML = `
-      <h3>👥 Мои инвестиции</h3>
-      ${state.contracts.length === 0 ? "<p>Активных контрактов нет</p>" : ""}
-      ${state.contracts.map(c => {
-        const p = ((Date.now() - c.start) / (c.end - c.start)) * 100;
-        return `
-          <div class="contract-card">
-            <b>${c.name}</b>
-            <p>${c.income.toFixed(4)} GRK / сек</p>
-            <div class="progress">
-              <div class="progress-bar" style="width:${Math.min(100,p)}%"></div>
-            </div>
-          </div>
-        `;
-      }).join("")}
-
-      <h4>🔗 Реферальная ссылка</h4>
-      <code>https://t.me/yourbot?start=${state.referralId}</code>
-    `;
-  }
+  if (screen === "home") renderHome();
+  if (screen === "shop") renderShop();
+  if (screen === "tasks") renderTasks();
+  if (screen === "refs") renderRefs();
 }
 
-/* ================== ACTIONS ================== */
+/* ========= SCREENS ========= */
+function renderHome() {
+  const s = document.getElementById("screen");
+  const income = state.contracts.reduce((s, c) => s + c.income, 0);
+
+  s.innerHTML = `
+    <div class="main-card">
+      <h2>${state.balance.toFixed(2)} GRK</h2>
+      <p>Доход: ${income.toFixed(4)} GRK / сек</p>
+    </div>
+  `;
+}
+
+function renderShop() {
+  const s = document.getElementById("screen");
+  s.innerHTML = `<h3>🛒 Магазин</h3>` +
+    shopItems.map((i, idx) => `
+      <div class="shop-card">
+        <h4>${i.name}</h4>
+        <p>Цена: ${i.price} GRK</p>
+        <p>Прибыль: +${(i.price * i.percent).toFixed(0)} GRK за 15 дней</p>
+        <button onclick="buy(${idx})">Купить</button>
+      </div>
+    `).join("");
+}
+
+function renderTasks() {
+  checkAdDay();
+  const s = document.getElementById("screen");
+
+  s.innerHTML = `
+    <h3>📋 Задания</h3>
+    <p>📺 Смотреть рекламу (${state.adsToday}/${ADS_LIMIT})</p>
+
+    <div class="ad-timer">
+      <svg width="120" height="120">
+        <circle cx="60" cy="60" r="54" stroke="#222" stroke-width="8" fill="none"/>
+        <circle id="adCircle"
+          cx="60" cy="60" r="54"
+          stroke="#4fd1ff" stroke-width="8"
+          fill="none"
+          stroke-dasharray="339"
+          stroke-dashoffset="339"/>
+      </svg>
+      <div id="adText">Готово</div>
+    </div>
+
+    <button id="adBtn" onclick="watchAd()">Смотреть рекламу</button>
+    <div id="adLog" style="margin-top:10px;opacity:.7"></div>
+  `;
+}
+
+function renderRefs() {
+  const s = document.getElementById("screen");
+  s.innerHTML = `
+    <h3>👥 Рефералы</h3>
+    <p>Приглашай друзей и зарабатывай</p>
+    <code>https://t.me/yourbot?start=${state.referralId}</code>
+  `;
+}
+
+/* ========= ACTIONS ========= */
 function buy(i) {
   const it = shopItems[i];
   if (state.balance < it.price) return alert("Недостаточно GRK");
@@ -177,19 +163,11 @@ function buy(i) {
   });
 
   save();
-  renderStats();
-  openScreen("portfolio", document.querySelectorAll(".bottom-nav button")[3]);
+  renderHeader();
+  openScreen("home", document.querySelectorAll(".bottom-nav button")[0]);
 }
 
-function checkAdDay() {
-  const today = new Date().toDateString();
-  if (state.lastAdDay !== today) {
-    state.lastAdDay = today;
-    state.adsToday = 0;
-  }
-}
-
-/* ================== AD LOGIC ================== */
+/* ========= ADS ========= */
 function watchAd() {
   if (adInProgress) return;
   if (state.adsToday >= ADS_LIMIT) return alert("Лимит рекламы");
@@ -203,7 +181,6 @@ function watchAd() {
   const log = document.getElementById("adLog");
 
   btn.disabled = true;
-  log.innerText = "";
   let time = AD_WATCH_TIME;
   let dash = 339;
 
@@ -217,7 +194,7 @@ function watchAd() {
       clearInterval(timer);
 
       if (!adValid) {
-        log.innerText = "❌ Реклама не засчитана (вы ушли из приложения)";
+        log.innerText = "❌ Реклама не засчитана";
         resetAd(btn, text, circle);
         return;
       }
@@ -225,8 +202,7 @@ function watchAd() {
       state.adsToday++;
       state.balance += GRK_PER_AD;
       save();
-      renderStats();
-      updateBalanceScreen();
+      renderHeader();
 
       log.innerText = "✅ Спасибо за просмотр рекламы!";
       startCooldown(btn, text, circle);
@@ -241,7 +217,6 @@ function startCooldown(btn, text, circle) {
   const timer = setInterval(() => {
     cd--;
     text.innerText = `⏳ ${cd}s`;
-
     if (cd <= 0) {
       clearInterval(timer);
       resetAd(btn, text, circle);
@@ -256,6 +231,14 @@ function resetAd(btn, text, circle) {
   circle.style.strokeDashoffset = 339;
 }
 
-/* ================== START ================== */
-renderStats();
-openScreen("balance", document.querySelector(".bottom-nav button"));
+function checkAdDay() {
+  const today = new Date().toDateString();
+  if (state.lastAdDay !== today) {
+    state.lastAdDay = today;
+    state.adsToday = 0;
+  }
+}
+
+/* ========= START ========= */
+renderHeader();
+openScreen("home", document.querySelectorAll(".bottom-nav button")[0]);
