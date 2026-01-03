@@ -33,14 +33,14 @@ const shopItems = [
   { name: "RTX 4090", priceTon: 3.0, percent: 0.05 }
 ];
 
-/* ========= ДОХОД ========= */
+/* ========= ДОХОД В СЕКУНДУ ========= */
 setInterval(() => {
   const now = Date.now();
   let income = 0;
 
   state.contracts = state.contracts.filter(c => {
     if (now >= c.end) return false;
-    income += c.income;
+    income += c.incomePerSec;
     return true;
   });
 
@@ -54,7 +54,7 @@ setInterval(() => {
 
 /* ========= ХЕДЕР ========= */
 function renderHeader() {
-  const income = state.contracts.reduce((s, c) => s + c.income, 0);
+  const income = state.contracts.reduce((s, c) => s + c.incomePerSec, 0);
   document.getElementById("balance").innerText = state.balance.toFixed(2);
   document.getElementById("income").innerText = income.toFixed(4);
 }
@@ -76,7 +76,7 @@ function openScreen(screen, btn) {
 
 /* ========= ЭКРАНЫ ========= */
 function renderHome() {
-  const income = state.contracts.reduce((s, c) => s + c.income, 0);
+  const income = state.contracts.reduce((s, c) => s + c.incomePerSec, 0);
   document.getElementById("screen").innerHTML = `
     <div class="main-card">
       <h2>${state.balance.toFixed(2)} GRK</h2>
@@ -91,19 +91,42 @@ function renderHome() {
 }
 
 function renderShop() {
-  document.getElementById("screen").innerHTML =
-    `<h3>🛒 Магазин</h3>` +
-    shopItems.map((i, idx) => {
-      const priceGRK = i.priceTon * GRK_PER_TON;
-      const totalGRK = priceGRK * (1 + i.percent);
-      return `
+  let html = `<h3>🛒 Магазин</h3>`;
+
+  /* === МОИ КОНТРАКТЫ === */
+  if (state.contracts.length > 0) {
+    html += `<h4>Мои контракты</h4>`;
+
+    state.contracts.forEach(c => {
+      const timeLeft = formatTime(c.end - Date.now());
+      html += `
+        <div class="shop-card">
+          <strong>${c.name}</strong>
+          <p>Доход: ${c.totalProfit} GRK</p>
+          <p>Осталось: ${timeLeft}</p>
+        </div>
+      `;
+    });
+  }
+
+  /* === МАГАЗИН === */
+  html += `<h4>Доступные видеокарты</h4>`;
+
+  shopItems.forEach((i, idx) => {
+    const priceGRK = i.priceTon * GRK_PER_TON;
+    const totalGRK = Math.round(priceGRK * (1 + i.percent));
+
+    html += `
       <div class="shop-card">
         <h4>${i.name}</h4>
         <p>Цена: ${i.priceTon} TON (${priceGRK} GRK)</p>
         <p>Доход за 15 дней: ${totalGRK} GRK</p>
         <button onclick="buy(${idx})">Купить</button>
-      </div>`;
-    }).join("");
+      </div>
+    `;
+  });
+
+  document.getElementById("screen").innerHTML = html;
 }
 
 function renderTasks() {
@@ -133,18 +156,21 @@ function buy(i) {
     return;
   }
 
-  const profitGRK = priceGRK * item.percent;
+  const profitGRK = Math.round(priceGRK * item.percent);
   const incomePerSec = profitGRK / (CONTRACT_DAYS * 86400);
 
   state.balance -= priceGRK;
   state.contracts.push({
+    name: item.name,
+    start: Date.now(),
     end: Date.now() + CONTRACT_DAYS * 86400000,
-    income: incomePerSec
+    incomePerSec,
+    totalProfit: profitGRK
   });
 
   save();
   renderHeader();
-  openScreen("home", document.querySelector(".bottom-nav button"));
+  openScreen("shop", document.querySelectorAll(".bottom-nav button")[1]);
 }
 
 function watchAd() {
@@ -162,6 +188,15 @@ function checkAdDay() {
     state.lastAdDay = today;
     state.adsToday = 0;
   }
+}
+
+/* ========= ВСПОМОГАТЕЛЬНОЕ ========= */
+function formatTime(ms) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  return `${d}д ${h}ч ${m}м`;
 }
 
 /* ========= ЗАГЛУШКИ ========= */
