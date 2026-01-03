@@ -1,89 +1,123 @@
 * {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  background: linear-gradient(180deg, #0a0f1f, #000);
+  font-family: system-ui, sans-serif;
+  background: linear-gradient(160deg, #0b1024, #141a3a);
   color: #fff;
 }
 
-#app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.app {
+  padding: 16px;
+  padding-bottom: 120px;
 }
 
-.header {
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  background: #111;
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
 }
 
-.title {
+header {
+  margin-bottom: 16px;
+}
+
+.income {
+  color: #4deeea;
   font-weight: bold;
 }
 
-.user {
-  opacity: 0.7;
-}
-
-.screen {
-  display: none;
-  flex: 1;
+.main-card {
+  text-align: center;
   padding: 20px;
 }
 
-.screen.active {
-  display: block;
+.main-card h2 {
+  font-size: 34px;
+  margin: 0;
 }
 
-.card {
-  background: #161b33;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 15px;
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
 }
 
-.label {
-  font-size: 14px;
-  opacity: 0.7;
-}
-
-.value {
-  font-size: 22px;
-  margin-top: 5px;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  margin: 10px 0;
+.actions button {
+  flex: 1;
 }
 
 button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  background: #3b82f6;
-  color: #fff;
+  padding: 14px;
+  border-radius: 16px;
   border: none;
-  border-radius: 10px;
-  font-size: 16px;
+  background: linear-gradient(135deg, #6a7cff, #4deeea);
+  color: #000;
+  font-weight: 700;
 }
 
-.nav {
+button.secondary {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+.shop-card {
+  background: rgba(255,255,255,0.07);
+  border-radius: 18px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.ad-timer {
+  margin: 20px auto;
+  width: 120px;
+  height: 120px;
+  position: relative;
+}
+
+.ad-timer svg {
+  transform: rotate(-90deg);
+}
+
+#adText {
+  position: absolute;
+  inset: 0;
   display: flex;
-  justify-content: space-around;
-  background: #111;
-  padding: 10px 0;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
-.nav button {
-  background: none;
+.bottom-nav {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.bottom-nav button {
+  flex: 1;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
   font-size: 22px;
+}
+
+.bottom-nav span {
+  display: block;
+  font-size: 12px;
+}
+
+.bottom-nav .active {
+  background: linear-gradient(135deg, #6a7cff, #4deeea);
+  color: #000;
 }
