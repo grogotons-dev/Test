@@ -9,24 +9,21 @@
 <body>
 
 <div class="app">
-  <header class="glass header-card">
+  <header class="glass">
     <h2 id="username">Player</h2>
-
-    <div class="stats-row">
-      <div class="balance-box">
-        <div class="coin-icon">◈</div>
-        <div class="balance-value">
-          <span id="balance">0</span> GRK
-        </div>
+    <div class="stats">
+      <div class="balance">
+        <svg class="mini-icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M8 12h8M12 8v8"/>
+        </svg>
+        <b><span id="balance">0</span> GRK</b>
       </div>
-
-      <div class="income-box">
-        <svg class="speed-icon" viewBox="0 0 24 24">
+      <div class="income">
+        <svg class="mini-icon" viewBox="0 0 24 24">
           <path d="M3 17l6-6 4 4 7-7"/>
         </svg>
-        <div class="income-text">
-          <span id="income">0</span> GRK / сек
-        </div>
+        <span id="income">0</span> GRK / сек
       </div>
     </div>
   </header>
