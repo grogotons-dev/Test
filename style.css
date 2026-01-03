@@ -27,10 +27,6 @@ html, body {
 }
 
 /* ===== HEADER ===== */
-.header-card {
-  margin-bottom: 16px;
-}
-
 .stats-row {
   display: flex;
   justify-content: space-between;
@@ -80,42 +76,6 @@ html, body {
   white-space: nowrap;
 }
 
-/* ===== MAIN ===== */
-.main-card {
-  text-align: center;
-}
-
-.main-card h1 {
-  margin: 0;
-  font-size: 36px;
-}
-
-.actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  margin-top: 24px;
-}
-
-.actions button {
-  flex: 1;
-  padding: 14px;
-  border-radius: 18px;
-  border: none;
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.btn-deposit {
-  background: linear-gradient(135deg, #22c55e, #3b82f6);
-  color: #000;
-}
-
-.btn-withdraw {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-}
-
 /* ===== NAV ===== */
 .bottom-nav {
   position: fixed;
@@ -139,11 +99,23 @@ html, body {
   gap: 4px;
 }
 
+.icon {
+  width: 26px;
+  height: 26px;
+  stroke: #22c55e;
+  fill: none;
+  stroke-width: 1.75;
+}
+
 .bottom-nav .active {
   background: linear-gradient(135deg, #22c55e, #3b82f6);
   color: #000;
 }
 
-.nav-icon {
-  font-size: 20px;
+.bottom-nav .active .icon {
+  stroke: #facc15;
+  filter:
+    drop-shadow(0 0 8px #facc15)
+    drop-shadow(0 0 18px rgba(250,204,21,0.8));
+  transform: scale(1.15);
 }
