@@ -9,78 +9,59 @@
 <body>
 
 <div class="app">
-  <!-- Панель настроек звука -->
+  <!-- Кнопка настроек -->
+  <div id="settingsBtn" class="settings-btn" onclick="toggleSettings()">
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="2"/>
+      <path d="M12 5v1m0 12v1m5-9h1M6 12h1m8-7 1 1m-10 10 1 1m10-10 1-1m-10 10 1-1"/>
+    </svg>
+  </div>
+
+  <!-- Панель настроек -->
   <div id="settingsPanel" class="settings-panel glass">
-    <h3>🎵 Настройки звука</h3>
-    
-    <div class="slider-container">
-      <div class="slider-label">
-        <span>Громкость звуков</span>
-        <span id="sfxValue">50%</span>
+    <div class="settings-section">
+      <div class="settings-title">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L9 5H6a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3l3 3v-16Z"/>
+          <path d="M17 9a5 5 0 0 1 0 6"/>
+          <path d="M19 7a9 9 0 0 1 0 10"/>
+        </svg>
+        <span id="settingsSoundTitle">Звук</span>
       </div>
-      <input type="range" min="0" max="100" value="50" class="slider" id="sfxSlider">
-    </div>
-    
-    <div class="slider-container">
-      <div class="slider-label">
-        <span>Громкость музыки</span>
-        <span id="musicValue">40%</span>
+      
+      <div class="volume-control">
+        <div class="volume-header">
+          <div class="volume-label" id="volumeLabel">Громкость</div>
+          <div class="volume-value" id="volumeValue">50%</div>
+        </div>
+        <div class="volume-slider-container">
+          <svg class="volume-icon" viewBox="0 0 24 24">
+            <path d="M12 2L9 5H6a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3l3 3v-16Z"/>
+          </svg>
+          <input type="range" min="0" max="100" value="50" class="volume-slider" id="volumeSlider">
+        </div>
       </div>
-      <input type="range" min="0" max="100" value="40" class="slider" id="musicSlider">
     </div>
     
-    <div class="slider-container">
-      <div class="slider-label">
-        <span>Громкость атмосферы</span>
-        <span id="ambientValue">30%</span>
+    <div class="settings-section">
+      <div class="settings-title">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12" y2="16"/>
+        </svg>
+        <span id="settingsLangTitle">Язык</span>
       </div>
-      <input type="range" min="0" max="100" value="30" class="slider" id="ambientSlider">
+      
+      <div class="language-switcher">
+        <button id="langRu" class="lang-btn active" onclick="setLanguage('ru')">Русский</button>
+        <button id="langEn" class="lang-btn" onclick="setLanguage('en')">English</button>
+      </div>
     </div>
     
-    <div style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
-      💡 Атмосферные звуки меняются в зависимости от вашего дохода
+    <div style="margin-top: 20px; font-size: 12px; opacity: 0.7; text-align: center;">
+      <span id="settingsInfo">💡 Настройки сохраняются автоматически</span>
     </div>
-  </div>
-
-  <!-- Кнопки управления звуком -->
-  <div class="audio-controls">
-    <div id="settingsBtn" class="audio-btn" onclick="toggleSettings()">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="2"/>
-        <path d="M12 5v1m0 12v1m5-9h1M6 12h1m8-7 1 1m-10 10 1 1m10-10 1-1m-10 10 1-1"/>
-      </svg>
-    </div>
-    
-    <div id="musicBtn" class="audio-btn" onclick="toggleMusic()">
-      <svg id="musicIcon" viewBox="0 0 24 24">
-        <path d="M9 18V5l12-2v13"/>
-        <circle cx="6" cy="18" r="3"/>
-        <circle cx="18" cy="16" r="3"/>
-      </svg>
-    </div>
-    
-    <div id="ambientBtn" class="audio-btn" onclick="toggleAmbient()">
-      <svg id="ambientIcon" viewBox="0 0 24 24">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-      </svg>
-    </div>
-    
-    <div id="sfxBtn" class="audio-btn" onclick="toggleSFX()">
-      <svg id="sfxIcon" viewBox="0 0 24 24">
-        <path d="M12 2L9 5H6a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3l3 3v-16Z"/>
-        <path d="M17 9a5 5 0 0 1 0 6"/>
-        <path d="M19 7a9 9 0 0 1 0 10"/>
-      </svg>
-    </div>
-  </div>
-
-  <!-- Индикатор атмосферы -->
-  <div class="ambient-indicator" id="ambientIndicator">
-    <div class="ambient-dot"></div>
-    <div class="ambient-dot"></div>
-    <div class="ambient-dot"></div>
-    <div class="ambient-dot"></div>
   </div>
 
   <header class="glass">
@@ -91,13 +72,13 @@
           <circle cx="12" cy="12" r="9"/>
           <path d="M8 12h8M12 8v8"/>
         </svg>
-        <b><span id="balance">0</span> GRK</b>
+        <b><span id="balance">0</span> <span id="currency">GRK</span></b>
       </div>
       <div class="income">
         <svg class="mini-icon" viewBox="0 0 24 24">
           <path d="M3 17l6-6 4 4 7-7"/>
         </svg>
-        <span id="income">0</span> GRK / сек
+        <span id="income">0</span> <span id="perSecond">GRK / сек</span>
       </div>
     </div>
   </header>
@@ -110,7 +91,7 @@
     <svg class="icon" viewBox="0 0 24 24">
       <path d="M12 2 3 9l9 13 9-13-9-7Z"/>
     </svg>
-    <span>Главная</span>
+    <span id="navHome">Главная</span>
   </button>
 
   <button onclick="openScreen('shop', this)">
@@ -119,7 +100,7 @@
       <circle cx="9" cy="12" r="2"/>
       <circle cx="15" cy="12" r="2"/>
     </svg>
-    <span>Магазин</span>
+    <span id="navShop">Магазин</span>
   </button>
 
   <button onclick="openScreen('tasks', this)">
@@ -127,7 +108,7 @@
       <rect x="5" y="3" width="14" height="18" rx="2"/>
       <path d="M9 9h6M9 13h6M9 17h4"/>
     </svg>
-    <span>Задания</span>
+    <span id="navTasks">Задания</span>
   </button>
 
   <button onclick="openScreen('refs', this)">
@@ -137,7 +118,7 @@
       <circle cx="18" cy="16" r="3"/>
       <path d="M9 10l-2 3M15 10l2 3"/>
     </svg>
-    <span>Рефералы</span>
+    <span id="navRefs">Рефералы</span>
   </button>
 </nav>
 
