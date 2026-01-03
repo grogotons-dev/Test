@@ -10,7 +10,7 @@ const CONTRACT_DAYS = 15;
 
 /* ================== STATE ================== */
 let state = JSON.parse(localStorage.getItem("grokGame")) || {
-  balance: 0,
+  balance: 10000,
   contracts: [],
   adsToday: 0,
   lastAdDay: null,
