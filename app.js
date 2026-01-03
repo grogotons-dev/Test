@@ -1,28 +1,31 @@
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
-/* ========= CONSTANTS ========= */
+/* ================== CONSTANTS ================== */
 const GRK_PER_AD = 15;
 const ADS_LIMIT = 20;
-const AD_COOLDOWN = 20;
+const AD_WATCH_TIME = 10;
+const AD_COOLDOWN = 10;
 const CONTRACT_DAYS = 15;
 
-/* ========= STATE ========= */
+/* ================== STATE ================== */
 let state = JSON.parse(localStorage.getItem("grokGame")) || {
   balance: 0,
   contracts: [],
   adsToday: 0,
   lastAdDay: null,
-  lastAdTime: 0,
   referralId: Math.random().toString(36).slice(2, 10)
 };
 
-/* ========= USER ========= */
+let adInProgress = false;
+let adValid = true;
+
+/* ================== USER ================== */
 const user = tg?.initDataUnsafe?.user || {};
 document.getElementById("username").innerText =
   user.username || user.first_name || "Player";
 
-/* ========= SHOP ========= */
+/* ================== SHOP ================== */
 const shopItems = [
   { name: "GTX 1050", price: 1000, percent: 0.20 },
   { name: "GTX 1660", price: 3000, percent: 0.25 },
@@ -30,7 +33,7 @@ const shopItems = [
   { name: "RTX 4090", price: 30000, percent: 0.35 }
 ];
 
-/* ========= LOOP ========= */
+/* ================== MAIN LOOP ================== */
 setInterval(() => {
   const now = Date.now();
   let income = 0;
@@ -41,35 +44,59 @@ setInterval(() => {
     return true;
   });
 
-  state.balance += income;
-  save();
-  renderStats();
+  if (income > 0) {
+    state.balance += income;
+    save();
+    renderStats();
+    updateBalanceScreen();
+  }
 }, 1000);
 
-/* ========= SAVE / RENDER ========= */
+/* ================== VISIBILITY ANTIBOT ================== */
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") {
+    adValid = false;
+  }
+});
+
+window.addEventListener("blur", () => {
+  adValid = false;
+});
+
+/* ================== SAVE ================== */
 function save() {
   localStorage.setItem("grokGame", JSON.stringify(state));
 }
 
+/* ================== HEADER ================== */
 function renderStats() {
   const income = state.contracts.reduce((s, c) => s + c.income, 0);
   document.getElementById("balance").innerText = state.balance.toFixed(2);
   document.getElementById("income").innerText = income.toFixed(4);
 }
 
-/* ========= NAV ========= */
+/* ================== BALANCE SCREEN ================== */
+function updateBalanceScreen() {
+  const el = document.getElementById("balanceScreenValue");
+  if (el) el.innerText = state.balance.toFixed(2) + " GRK";
+}
+
+/* ================== NAV ================== */
 function openScreen(screen, btn) {
   document.querySelectorAll(".bottom-nav button")
     .forEach(b => b.classList.remove("active"));
-
   if (btn) btn.classList.add("active");
 
   const s = document.getElementById("screen");
   s.innerHTML = "";
 
   if (screen === "balance") {
-    s.innerHTML = `<h3>💰 Баланс</h3>
-      <p><b>${state.balance.toFixed(2)} GRK</b></p>`;
+    s.innerHTML = `
+      <h3>💰 Баланс</h3>
+      <div id="balanceScreenValue" style="font-size:26px;font-weight:bold">
+        ${state.balance.toFixed(2)} GRK
+      </div>
+    `;
   }
 
   if (screen === "shop") {
@@ -78,8 +105,7 @@ function openScreen(screen, btn) {
         <div class="shop-card">
           <h4>${i.name}</h4>
           <p>Цена: ${i.price} GRK</p>
-          <p>Доход: +${(i.price * i.percent).toFixed(0)} GRK</p>
-          <p>Срок: 15 дней</p>
+          <p>Доход: +${(i.price * i.percent).toFixed(0)} GRK за 15 дней</p>
           <button onclick="buy(${idx})">Инвестировать</button>
         </div>
       `).join("");
@@ -87,32 +113,42 @@ function openScreen(screen, btn) {
 
   if (screen === "ads") {
     checkAdDay();
-    const cd = Math.max(0, AD_COOLDOWN - Math.floor((Date.now() - state.lastAdTime) / 1000));
 
     s.innerHTML = `
       <h3>📺 Реклама</h3>
-      <p>${state.adsToday} / ${ADS_LIMIT}</p>
-      <button ${cd > 0 ? "disabled" : ""} onclick="watchAd()">Смотреть рекламу</button>
-      <div class="progress">
-        <div class="progress-bar" id="adBar"></div>
-      </div>
-    `;
+      <p>${state.adsToday} / ${ADS_LIMIT} сегодня</p>
 
-    startAdBar(cd);
+      <div class="ad-timer">
+        <svg width="120" height="120">
+          <circle cx="60" cy="60" r="54"
+            stroke="#222" stroke-width="8" fill="none"/>
+          <circle id="adCircle"
+            cx="60" cy="60" r="54"
+            stroke="#4fd1ff" stroke-width="8"
+            fill="none"
+            stroke-dasharray="339"
+            stroke-dashoffset="339"/>
+        </svg>
+        <div id="adText">Готово</div>
+      </div>
+
+      <button id="adBtn" onclick="watchAd()">Смотреть рекламу</button>
+      <div id="adLog" style="margin-top:10px;opacity:.7"></div>
+    `;
   }
 
   if (screen === "portfolio") {
     s.innerHTML = `
       <h3>👥 Мои инвестиции</h3>
-      ${state.contracts.length === 0 ? "<p>Нет активных контрактов</p>" : ""}
+      ${state.contracts.length === 0 ? "<p>Активных контрактов нет</p>" : ""}
       ${state.contracts.map(c => {
-        const progress = Math.min(100, ((Date.now() - c.start) / (c.end - c.start)) * 100);
+        const p = ((Date.now() - c.start) / (c.end - c.start)) * 100;
         return `
           <div class="contract-card">
             <b>${c.name}</b>
-            <p>Доход: ${c.income.toFixed(4)} GRK / сек</p>
+            <p>${c.income.toFixed(4)} GRK / сек</p>
             <div class="progress">
-              <div class="progress-bar" style="width:${progress}%"></div>
+              <div class="progress-bar" style="width:${Math.min(100,p)}%"></div>
             </div>
           </div>
         `;
@@ -124,7 +160,7 @@ function openScreen(screen, btn) {
   }
 }
 
-/* ========= ACTIONS ========= */
+/* ================== ACTIONS ================== */
 function buy(i) {
   const it = shopItems[i];
   if (state.balance < it.price) return alert("Недостаточно GRK");
@@ -153,32 +189,73 @@ function checkAdDay() {
   }
 }
 
+/* ================== AD LOGIC ================== */
 function watchAd() {
+  if (adInProgress) return;
   if (state.adsToday >= ADS_LIMIT) return alert("Лимит рекламы");
 
-  state.adsToday++;
-  state.lastAdTime = Date.now();
-  state.balance += GRK_PER_AD;
+  adInProgress = true;
+  adValid = true;
 
-  save();
-  renderStats();
-  openScreen("ads", document.querySelectorAll(".bottom-nav button")[2]);
-}
+  const btn = document.getElementById("adBtn");
+  const text = document.getElementById("adText");
+  const circle = document.getElementById("adCircle");
+  const log = document.getElementById("adLog");
 
-function startAdBar(cd) {
-  const bar = document.getElementById("adBar");
-  if (!bar) return;
-
-  let left = cd;
-  bar.style.width = "0%";
+  btn.disabled = true;
+  log.innerText = "";
+  let time = AD_WATCH_TIME;
+  let dash = 339;
 
   const timer = setInterval(() => {
-    left--;
-    bar.style.width = ((AD_COOLDOWN - left) / AD_COOLDOWN) * 100 + "%";
-    if (left <= 0) clearInterval(timer);
+    text.innerText = `${time}s`;
+    dash -= 339 / AD_WATCH_TIME;
+    circle.style.strokeDashoffset = dash;
+    time--;
+
+    if (time < 0) {
+      clearInterval(timer);
+
+      if (!adValid) {
+        log.innerText = "❌ Реклама не засчитана (вы ушли из приложения)";
+        resetAd(btn, text, circle);
+        return;
+      }
+
+      state.adsToday++;
+      state.balance += GRK_PER_AD;
+      save();
+      renderStats();
+      updateBalanceScreen();
+
+      log.innerText = "✅ Спасибо за просмотр рекламы!";
+      startCooldown(btn, text, circle);
+    }
   }, 1000);
 }
 
-/* ========= START ========= */
+function startCooldown(btn, text, circle) {
+  let cd = AD_COOLDOWN;
+  text.innerText = `⏳ ${cd}s`;
+
+  const timer = setInterval(() => {
+    cd--;
+    text.innerText = `⏳ ${cd}s`;
+
+    if (cd <= 0) {
+      clearInterval(timer);
+      resetAd(btn, text, circle);
+    }
+  }, 1000);
+}
+
+function resetAd(btn, text, circle) {
+  adInProgress = false;
+  btn.disabled = false;
+  text.innerText = "Готово";
+  circle.style.strokeDashoffset = 339;
+}
+
+/* ================== START ================== */
 renderStats();
 openScreen("balance", document.querySelector(".bottom-nav button"));
