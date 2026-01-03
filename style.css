@@ -40,6 +40,7 @@ main {
   animation: fadeUp 0.4s ease;
 }
 
+/* ===== Buttons ===== */
 button {
   width: 100%;
   padding: 14px;
@@ -64,6 +65,25 @@ button:active {
   color: #fff;
 }
 
+/* ===== Shop Cards ===== */
+.shop-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.shop-card h4 {
+  margin: 0 0 8px 0;
+}
+
+.shop-card p {
+  margin: 4px 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* ===== Bottom Nav ===== */
 .bottom-nav {
   position: fixed;
   bottom: 10px;
@@ -92,6 +112,7 @@ button:active {
   color: #000;
 }
 
+/* ===== Animations ===== */
 @keyframes fadeUp {
   from {
     opacity: 0;
