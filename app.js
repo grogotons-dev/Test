@@ -1,0 +1,581 @@
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
+
+/* ========= НАСТРОЙКИ ЯЗЫКА ========= */
+const translations = {
+  ru: {
+    // Заголовки
+    title: "Grok Invest",
+    soundTitle: "Звук",
+    langTitle: "Язык",
+    volumeLabel: "Громкость",
+    settingsInfo: "💡 Настройки сохраняются автоматически",
+    
+    // Валюта
+    currency: "GRK",
+    perSecond: "GRK / сек",
+    
+    // Навигация
+    navHome: "Главная",
+    navShop: "Магазин",
+    navTasks: "Задания",
+    navRefs: "Рефералы",
+    
+    // Главный экран
+    balanceTitle: "Баланс",
+    incomeTitle: "Доход",
+    depositBtn: "⬆️ Пополнить",
+    withdrawBtn: "⬇️ Вывести",
+    
+    // Магазин
+    shopTitle: "🛒 Магазин",
+    myContracts: "Мои контракты",
+    availableCards: "Доступные видеокарты",
+    contractIncome: "Доход",
+    timeLeft: "Осталось",
+    priceLabel: "Цена",
+    profitLabel: "Доход за 15 дней",
+    buyBtn: "Купить",
+    insufficientFunds: "Недостаточно GRK",
+    
+    // Задания
+    tasksTitle: "📋 Задания",
+    adsLabel: "Реклама",
+    watchAdBtn: "Смотреть рекламу (+{GRK_PER_AD} GRK)",
+    limitReached: "Лимит исчерпан",
+    
+    // Рефералы
+    refsTitle: "👥 Рефералы",
+    refsDesc: "5% с вывода рефералов",
+    copyBtn: "📋 Скопировать ссылку",
+    copied: "Скопировано!",
+    
+    // Сообщения
+    contractCompleted: "✅ Контракт завершён!",
+    purchased: "🎉 Куплено!",
+    limitReachedMsg: "⚠️ Лимит",
+    depositComing: "Пополнение будет подключено позже",
+    withdrawComing: "Вывод будет подключён позже",
+    insufficientMsg: "❌ Недостаточно GRK"
+  },
+  
+  en: {
+    // Titles
+    title: "Grok Invest",
+    soundTitle: "Sound",
+    langTitle: "Language",
+    volumeLabel: "Volume",
+    settingsInfo: "💡 Settings are saved automatically",
+    
+    // Currency
+    currency: "GRK",
+    perSecond: "GRK / sec",
+    
+    // Navigation
+    navHome: "Home",
+    navShop: "Shop",
+    navTasks: "Tasks",
+    navRefs: "Referrals",
+    
+    // Main screen
+    balanceTitle: "Balance",
+    incomeTitle: "Income",
+    depositBtn: "⬆️ Deposit",
+    withdrawBtn: "⬇️ Withdraw",
+    
+    // Shop
+    shopTitle: "🛒 Shop",
+    myContracts: "My Contracts",
+    availableCards: "Available GPUs",
+    contractIncome: "Income",
+    timeLeft: "Time left",
+    priceLabel: "Price",
+    profitLabel: "Profit for 15 days",
+    buyBtn: "Buy",
+    insufficientFunds: "Insufficient GRK",
+    
+    // Tasks
+    tasksTitle: "📋 Tasks",
+    adsLabel: "Ads",
+    watchAdBtn: "Watch ad (+{GRK_PER_AD} GRK)",
+    limitReached: "Limit reached",
+    
+    // Referrals
+    refsTitle: "👥 Referrals",
+    refsDesc: "5% from referrals' withdrawals",
+    copyBtn: "📋 Copy link",
+    copied: "Copied!",
+    
+    // Messages
+    contractCompleted: "✅ Contract completed!",
+    purchased: "🎉 Purchased!",
+    limitReachedMsg: "⚠️ Limit",
+    depositComing: "Deposit will be connected later",
+    withdrawComing: "Withdrawal will be connected later",
+    insufficientMsg: "❌ Insufficient GRK"
+  }
+};
+
+/* ========= ЭКОНОМИКА ========= */
+const GRK_PER_TON = 100000;
+const CONTRACT_DAYS = 15;
+const GRK_PER_AD = 15;
+const ADS_LIMIT = 20;
+
+/* ========= СОСТОЯНИЕ ========= */
+let state = JSON.parse(localStorage.getItem("grok_final")) || {
+  balance: 0,
+  contracts: [],
+  adsToday: 0,
+  lastAdDay: null,
+  referralId: Math.random().toString(36).slice(2, 10)
+};
+
+// Текущий язык
+let currentLang = localStorage.getItem('grok_lang') || 'ru';
+
+/* ========= АУДИО-МЕНЕДЖЕР (упрощённый) ========= */
+const AudioManager = {
+  ctx: null,
+  masterVolume: parseFloat(localStorage.getItem('master_volume') || '0.5'),
+  enabled: localStorage.getItem('sound_enabled') !== 'false',
+  
+  init() {
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.updateVolume();
+  },
+  
+  playTone(freq, duration, type = 'sine') {
+    if (!this.enabled || this.masterVolume === 0) return;
+    
+    try {
+      const oscillator = this.ctx.createOscillator();
+      const gainNode = this.ctx.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(this.ctx.destination);
+      
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(freq, this.ctx.currentTime);
+      
+      const volume = this.masterVolume * 0.3;
+      gainNode.gain.setValueAtTime(volume, this.ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+      
+      oscillator.start();
+      oscillator.stop(this.ctx.currentTime + duration);
+    } catch (e) {
+      console.log("Audio error:", e);
+    }
+  },
+  
+  playClick() {
+    this.playTone(600, 0.1, 'sine');
+  },
+  
+  playCoin() {
+    this.playTone(800, 0.15, 'sine');
+    setTimeout(() => this.playTone(1200, 0.1, 'sine'), 100);
+  },
+  
+  playBuy() {
+    this.playTone(500, 0.2, 'sawtooth');
+    setTimeout(() => this.playTone(700, 0.15, 'sawtooth'), 150);
+  },
+  
+  playError() {
+    this.playTone(300, 0.3, 'sine');
+  },
+  
+  playNotification() {
+    this.playTone(800, 0.2, 'square');
+    setTimeout(() => this.playTone(600, 0.2, 'square'), 200);
+  },
+  
+  setVolume(value) {
+    this.masterVolume = value / 100;
+    localStorage.setItem('master_volume', this.masterVolume);
+    this.updateVolume();
+  },
+  
+  updateVolume() {
+    document.getElementById('volumeValue').textContent = `${Math.round(this.masterVolume * 100)}%`;
+    document.getElementById('volumeSlider').value = this.masterVolume * 100;
+  },
+  
+  toggle() {
+    this.enabled = !this.enabled;
+    localStorage.setItem('sound_enabled', this.enabled);
+    
+    if (this.enabled) {
+      this.playClick();
+    }
+    
+    return this.enabled;
+  }
+};
+
+// Инициализация аудио
+AudioManager.init();
+
+// Разрешаем автоплей при первом клике
+document.addEventListener('click', function initAudio() {
+  if (AudioManager.ctx && AudioManager.ctx.state === 'suspended') {
+    AudioManager.ctx.resume();
+  }
+  document.removeEventListener('click', initAudio);
+}, { once: true });
+
+function save() {
+  localStorage.setItem("grok_final", JSON.stringify(state));
+}
+
+/* ========= ПОЛЬЗОВАТЕЛЬ ========= */
+const user = tg?.initDataUnsafe?.user || {};
+document.getElementById("username").innerText =
+  user.username || user.first_name || "Player";
+
+/* ========= МАГАЗИН ========= */
+const shopItems = [
+  { name: "GTX 1050", priceTon: 0.1, percent: 0.20 },
+  { name: "GTX 1660", priceTon: 0.3, percent: 0.15 },
+  { name: "RTX 3060", priceTon: 1.0, percent: 0.10 },
+  { name: "RTX 4090", priceTon: 3.0, percent: 0.05 }
+];
+
+/* ========= ДОХОД В СЕКУНДУ ========= */
+setInterval(() => {
+  const now = Date.now();
+  let income = 0;
+
+  state.contracts = state.contracts.filter(c => {
+    if (now >= c.end) {
+      AudioManager.playNotification();
+      showParticleEffect(t('contractCompleted'));
+      return false;
+    }
+    income += c.incomePerSec;
+    return true;
+  });
+
+  if (income > 0) {
+    state.balance += income;
+    save();
+    renderHeader();
+    if (document.querySelector('.bottom-nav .active span')?.textContent === t('navHome')) {
+      renderHome();
+    }
+  }
+}, 1000);
+
+/* ========= ЯЗЫКОВЫЕ ФУНКЦИИ ========= */
+function t(key, params = {}) {
+  let text = translations[currentLang][key] || translations['ru'][key] || key;
+  
+  // Заменяем параметры
+  Object.keys(params).forEach(param => {
+    text = text.replace(`{${param}}`, params[param]);
+  });
+  
+  return text;
+}
+
+function updateLanguage() {
+  // Обновляем заголовок страницы
+  document.title = t('title');
+  
+  // Обновляем UI элементы
+  document.getElementById('settingsSoundTitle').textContent = t('soundTitle');
+  document.getElementById('settingsLangTitle').textContent = t('langTitle');
+  document.getElementById('volumeLabel').textContent = t('volumeLabel');
+  document.getElementById('settingsInfo').textContent = t('settingsInfo');
+  
+  document.getElementById('currency').textContent = t('currency');
+  document.getElementById('perSecond').textContent = t('perSecond');
+  
+  document.getElementById('navHome').textContent = t('navHome');
+  document.getElementById('navShop').textContent = t('navShop');
+  document.getElementById('navTasks').textContent = t('navTasks');
+  document.getElementById('navRefs').textContent = t('navRefs');
+  
+  // Обновляем активный экран
+  const activeBtn = document.querySelector('.bottom-nav .active');
+  if (activeBtn) {
+    const screen = Array.from(document.querySelectorAll('.bottom-nav button')).indexOf(activeBtn);
+    const screens = ['home', 'shop', 'tasks', 'refs'];
+    openScreen(screens[screen], activeBtn);
+  }
+  
+  // Обновляем кнопки языка
+  document.getElementById('langRu').classList.toggle('active', currentLang === 'ru');
+  document.getElementById('langEn').classList.toggle('active', currentLang === 'en');
+}
+
+function setLanguage(lang) {
+  if (currentLang === lang) return;
+  
+  currentLang = lang;
+  localStorage.setItem('grok_lang', lang);
+  
+  AudioManager.playClick();
+  updateLanguage();
+}
+
+/* ========= ХЕДЕР ========= */
+function renderHeader() {
+  const income = state.contracts.reduce((s, c) => s + c.incomePerSec, 0);
+  document.getElementById("balance").innerText = state.balance.toFixed(2);
+  document.getElementById("income").innerText = income.toFixed(4);
+}
+
+/* ========= НАВИГАЦИЯ ========= */
+function openScreen(screen, btn) {
+  AudioManager.playClick();
+  
+  document.querySelectorAll(".bottom-nav button")
+    .forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+
+  const s = document.getElementById("screen");
+  s.innerHTML = "";
+
+  if (screen === "home") renderHome();
+  if (screen === "shop") renderShop();
+  if (screen === "tasks") renderTasks();
+  if (screen === "refs") renderRefs();
+}
+
+/* ========= ЭКРАНЫ ========= */
+function renderHome() {
+  const income = state.contracts.reduce((s, c) => s + c.incomePerSec, 0);
+  document.getElementById("screen").innerHTML = `
+    <div class="main-card">
+      <h2>${state.balance.toFixed(2)} ${t('currency')}</h2>
+      <p>${t('incomeTitle')}: ${income.toFixed(4)} ${t('perSecond')}</p>
+
+      <div class="actions">
+        <button onclick="deposit()">${t('depositBtn')}</button>
+        <button class="secondary" onclick="withdraw()">${t('withdrawBtn')}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderShop() {
+  let html = `<h3>${t('shopTitle')}</h3>`;
+
+  /* === МОИ КОНТРАКТЫ === */
+  if (state.contracts.length > 0) {
+    html += `<h4>${t('myContracts')}</h4>`;
+
+    state.contracts.forEach((c, idx) => {
+      const timeLeft = formatTime(c.end - Date.now());
+      const progress = Math.max(0, 100 - ((c.end - Date.now()) / (CONTRACT_DAYS * 86400000) * 100));
+      
+      html += `
+        <div class="shop-card">
+          <strong>${c.name}</strong>
+          <p>${t('contractIncome')}: ${c.totalProfit} ${t('currency')}</p>
+          <div style="background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; margin: 8px 0; overflow: hidden;">
+            <div style="width: ${progress}%; height: 100%; background: linear-gradient(90deg, #22c55e, #3b82f6);"></div>
+          </div>
+          <p>${t('timeLeft')}: ${timeLeft}</p>
+        </div>
+      `;
+    });
+  }
+
+  /* === МАГАЗИН === */
+  html += `<h4>${t('availableCards')}</h4>`;
+
+  shopItems.forEach((i, idx) => {
+    const priceGRK = i.priceTon * GRK_PER_TON;
+    const totalGRK = Math.round(priceGRK * (1 + i.percent));
+    const canBuy = state.balance >= priceGRK;
+    const profit = totalGRK - priceGRK;
+    
+    html += `
+      <div class="shop-card">
+        <h4>${i.name}</h4>
+        <p>${t('priceLabel')}: ${i.priceTon} TON (${priceGRK} ${t('currency')})</p>
+        <p>${t('profitLabel')}: +${profit} ${t('currency')}</p>
+        <button ${!canBuy ? 'disabled' : ''} onclick="buy(${idx})">
+          ${canBuy ? t('buyBtn') : t('insufficientFunds')}
+        </button>
+      </div>
+    `;
+  });
+
+  document.getElementById("screen").innerHTML = html;
+}
+
+function renderTasks() {
+  checkAdDay();
+  const adText = state.adsToday >= ADS_LIMIT 
+    ? t('limitReached')
+    : t('watchAdBtn', { GRK_PER_AD });
+  
+  document.getElementById("screen").innerHTML = `
+    <h3>${t('tasksTitle')}</h3>
+    <p>${t('adsLabel')}: ${state.adsToday}/${ADS_LIMIT}</p>
+    <button onclick="watchAd()" ${state.adsToday >= ADS_LIMIT ? 'disabled' : ''}>
+      ${adText}
+    </button>
+  `;
+}
+
+function renderRefs() {
+  document.getElementById("screen").innerHTML = `
+    <h3>${t('refsTitle')}</h3>
+    <p>${t('refsDesc')}</p>
+    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin: 10px 0; font-family: monospace; word-break: break-all;">
+      https://t.me/yourbot?start=${state.referralId}
+    </div>
+    <button onclick="copyRefLink()" style="margin-top: 10px;">${t('copyBtn')}</button>
+  `;
+}
+
+/* ========= ДЕЙСТВИЯ ========= */
+function buy(i) {
+  const item = shopItems[i];
+  const priceGRK = item.priceTon * GRK_PER_TON;
+
+  if (state.balance < priceGRK) {
+    AudioManager.playError();
+    showParticleEffect(t('insufficientMsg'));
+    return;
+  }
+
+  AudioManager.playBuy();
+  
+  const profitGRK = Math.round(priceGRK * item.percent);
+  const incomePerSec = profitGRK / (CONTRACT_DAYS * 86400);
+
+  state.balance -= priceGRK;
+  state.contracts.push({
+    name: item.name,
+    start: Date.now(),
+    end: Date.now() + CONTRACT_DAYS * 86400000,
+    incomePerSec,
+    totalProfit: profitGRK
+  });
+
+  save();
+  renderHeader();
+  
+  showParticleEffect(t('purchased'));
+  
+  setTimeout(() => {
+    openScreen('shop', document.querySelectorAll('.bottom-nav button')[1]);
+  }, 800);
+}
+
+function watchAd() {
+  if (state.adsToday >= ADS_LIMIT) {
+    AudioManager.playError();
+    showParticleEffect(t('limitReachedMsg'));
+    return;
+  }
+
+  AudioManager.playClick();
+  AudioManager.playCoin();
+  
+  state.adsToday++;
+  state.balance += GRK_PER_AD;
+  save();
+  renderHeader();
+  
+  showParticleEffect(`+${GRK_PER_AD} ${t('currency')}`);
+  renderTasks();
+}
+
+function checkAdDay() {
+  const today = new Date().toDateString();
+  if (state.lastAdDay !== today) {
+    state.lastAdDay = today;
+    state.adsToday = 0;
+  }
+}
+
+function copyRefLink() {
+  const link = `https://t.me/yourbot?start=${state.referralId}`;
+  navigator.clipboard.writeText(link).then(() => {
+    AudioManager.playNotification();
+    showParticleEffect(t('copied'));
+  });
+}
+
+/* ========= УПРАВЛЕНИЕ НАСТРОЙКАМИ ========= */
+function toggleSettings() {
+  const panel = document.getElementById('settingsPanel');
+  panel.classList.toggle('show');
+  AudioManager.playClick();
+}
+
+// Слайдер громкости
+document.getElementById('volumeSlider').addEventListener('input', (e) => {
+  const value = e.target.value;
+  AudioManager.setVolume(value);
+});
+
+// Закрытие настроек при клике вне панели
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('settingsPanel');
+  const btn = document.getElementById('settingsBtn');
+  
+  if (panel && panel.classList.contains('show') && 
+      !panel.contains(e.target) && 
+      !btn.contains(e.target)) {
+    panel.classList.remove('show');
+  }
+});
+
+/* ========= ВСПОМОГАТЕЛЬНОЕ ========= */
+function showParticleEffect(text) {
+  const particle = document.createElement('div');
+  particle.className = 'particle';
+  particle.textContent = text;
+  particle.style.cssText = `
+    top: ${50 + (Math.random() * 20 - 10)}%;
+    left: ${50 + (Math.random() * 20 - 10)}%;
+    color: ${text.includes('+') ? '#22c55e' : text.includes('❌') ? '#ef4444' : '#facc15'};
+    font-size: ${text.length > 10 ? '16px' : '24px'};
+  `;
+  
+  document.body.appendChild(particle);
+  
+  setTimeout(() => {
+    particle.remove();
+  }, 1500);
+}
+
+function formatTime(ms) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  
+  if (currentLang === 'ru') {
+    return d > 0 ? `${d}д ${h}ч` : h > 0 ? `${h}ч ${m}м` : `${m}м ${s}с`;
+  } else {
+    return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m ${s}s`;
+  }
+}
+
+/* ========= ЗАГЛУШКИ ========= */
+function deposit() {
+  AudioManager.playClick();
+  alert(t('depositComing'));
+}
+
+function withdraw() {
+  AudioManager.playClick();
+  alert(t('withdrawComing'));
+}
+
+/* ========= СТАРТ ========= */
+// Загружаем язык и обновляем интерфейс
+updateLanguage();
+renderHeader();
+openScreen("home", document.querySelector(".bottom-nav button"));
