@@ -1,6 +1,4 @@
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -22,25 +20,13 @@ body {
   box-shadow: 0 15px 40px rgba(0,0,0,0.4);
 }
 
-header {
-  margin-bottom: 16px;
-}
-
-.stats div {
-  margin-top: 6px;
-}
+header { margin-bottom: 16px; }
 
 .income {
   color: #4deeea;
   font-weight: bold;
 }
 
-main {
-  min-height: 260px;
-  animation: fadeUp 0.4s ease;
-}
-
-/* Buttons */
 button {
   width: 100%;
   padding: 14px;
@@ -49,39 +35,35 @@ button {
   border: none;
   background: linear-gradient(135deg, #7c7cff, #4deeea);
   color: #000;
-  font-size: 16px;
   font-weight: bold;
-  cursor: pointer;
 }
 
-button:active {
-  transform: scale(0.96);
+button:disabled {
+  opacity: 0.5;
 }
 
-.small {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-}
-
-/* Shop */
-.shop-card {
+.shop-card, .contract-card {
   background: rgba(255,255,255,0.06);
   border-radius: 16px;
   padding: 14px;
   margin-top: 14px;
 }
 
-.shop-card h4 {
-  margin: 0 0 6px 0;
+.progress {
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  height: 10px;
+  overflow: hidden;
+  margin-top: 8px;
 }
 
-.shop-card p {
-  margin: 4px 0;
-  font-size: 14px;
-  opacity: 0.9;
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4deeea, #7c7cff);
+  width: 0%;
+  transition: width 1s linear;
 }
 
-/* Bottom Nav */
 .bottom-nav {
   position: fixed;
   bottom: 10px;
@@ -95,8 +77,7 @@ button:active {
   flex: 1;
   background: rgba(255,255,255,0.08);
   color: #fff;
-  font-size: 22px;
-  padding: 12px 6px;
+  font-size: 20px;
 }
 
 .bottom-nav span {
@@ -107,16 +88,4 @@ button:active {
 .bottom-nav .active {
   background: linear-gradient(135deg, #7c7cff, #4deeea);
   color: #000;
-}
-
-/* Animation */
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
