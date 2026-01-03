@@ -60,18 +60,15 @@ body::before {
   100% { text-shadow: 0 0 6px #22c55e; }
 }
 
-@keyframes ambientPulse {
-  0% { opacity: 0.3; }
-  50% { opacity: 0.7; }
-  100% { opacity: 0.3; }
-}
-
-@keyframes vibration {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-1px); }
-  50% { transform: translateX(0); }
-  75% { transform: translateX(1px); }
-  100% { transform: translateX(0); }
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ======= APP ======= */
@@ -216,19 +213,13 @@ button:disabled {
   transform: scale(1.2);
 }
 
-/* ======= КНОПКИ АУДИО ======= */
-.audio-controls {
+/* ======= КНОПКА НАСТРОЕК ======= */
+.settings-btn {
   position: fixed;
   top: 20px;
   right: 20px;
-  display: flex;
-  gap: 10px;
-  z-index: 100;
-}
-
-.audio-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   background: rgba(255,255,255,0.08);
   border-radius: 50%;
   display: flex;
@@ -238,68 +229,36 @@ button:disabled {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(34,197,94,0.3);
   transition: all 0.3s;
+  z-index: 100;
 }
 
-.audio-btn:hover {
+.settings-btn:hover {
   background: rgba(34,197,94,0.2);
   transform: scale(1.1);
 }
 
-.audio-btn.muted {
-  opacity: 0.5;
-}
-
-.audio-btn svg {
-  width: 20px;
-  height: 20px;
+.settings-btn svg {
+  width: 24px;
+  height: 24px;
   stroke: #22c55e;
   fill: none;
   stroke-width: 2;
 }
 
-/* ======= ИНДИКАТОРЫ АТМОСФЕРЫ ======= */
-.ambient-indicator {
-  position: fixed;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 5px;
-  z-index: 5;
-  opacity: 0.7;
-}
-
-.ambient-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #22c55e;
-  animation: ambientPulse 2s infinite;
-}
-
-.ambient-dot:nth-child(2) { animation-delay: 0.4s; }
-.ambient-dot:nth-child(3) { animation-delay: 0.8s; }
-.ambient-dot:nth-child(4) { animation-delay: 1.2s; }
-
-/* ======= АКТИВНЫЕ КАРТЫ (вибрация) ======= */
-.contract-active {
-  animation: vibration 0.3s ease-in-out;
-  border-color: #facc15 !important;
-}
-
-/* ======= СТИЛИ ДЛЯ НАСТРОЕК ======= */
+/* ======= ПАНЕЛЬ НАСТРОЕК ======= */
 .settings-panel {
   position: fixed;
-  top: 70px;
+  top: 74px;
   right: 20px;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(20px);
   border-radius: 16px;
   padding: 20px;
-  width: 250px;
+  width: 280px;
   z-index: 99;
   border: 1px solid rgba(34,197,94,0.3);
   display: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .settings-panel.show {
@@ -307,30 +266,71 @@ button:disabled {
   animation: slideIn 0.3s ease-out;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.settings-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.slider-container {
+.settings-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.settings-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-title svg {
+  width: 18px;
+  height: 18px;
+  stroke: #22c55e;
+}
+
+/* ======= СЛАЙДЕР ГРОМКОСТИ ======= */
+.volume-control {
   margin: 15px 0;
 }
 
-.slider-label {
+.volume-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
-  font-size: 14px;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.slider {
-  width: 100%;
+.volume-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.volume-value {
+  font-size: 14px;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.volume-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.volume-icon {
+  width: 20px;
+  height: 20px;
+  stroke: #22c55e;
+  fill: none;
+}
+
+.volume-slider {
+  flex: 1;
   height: 6px;
   -webkit-appearance: none;
   background: rgba(255,255,255,0.1);
@@ -338,13 +338,43 @@ button:disabled {
   outline: none;
 }
 
-.slider::-webkit-slider-thumb {
+.volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #22c55e;
   cursor: pointer;
+  border: 2px solid #000;
+  box-shadow: 0 0 10px rgba(34,197,94,0.5);
+}
+
+/* ======= ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА ======= */
+.language-switcher {
+  display: flex;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 4px;
+  margin-top: 10px;
+}
+
+.lang-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.lang-btn.active {
+  background: rgba(34,197,94,0.2);
+  color: #22c55e;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.2);
 }
 
 /* ======= ПАРТИКЛЫ ======= */
@@ -358,19 +388,16 @@ button:disabled {
 
 /* ======= РЕСПОНСИВ ======= */
 @media (max-width: 480px) {
-  .audio-controls {
-    top: 10px;
-    right: 10px;
-    gap: 5px;
-  }
-  
-  .audio-btn {
-    width: 36px;
-    height: 36px;
+  .settings-btn {
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
   }
   
   .settings-panel {
-    width: calc(100% - 40px);
-    right: 20px;
+    width: calc(100% - 30px);
+    right: 15px;
+    top: 65px;
   }
 }
