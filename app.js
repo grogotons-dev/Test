@@ -1,55 +1,83 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-let state = JSON.parse(localStorage.getItem("game")) || {
+/* ======================
+   STATE
+====================== */
+let state = JSON.parse(localStorage.getItem("grokGame")) || {
   balance: 0,
-  hash: 0
+  hash: 0,
+  totalEarned: 0,
+  adsWatched: 0
 };
 
-document.getElementById("username").innerText =
-  tg.initDataUnsafe?.user?.username || "Guest Miner";
+/* ======================
+   USER
+====================== */
+const username =
+  tg.initDataUnsafe?.user?.username ||
+  tg.initDataUnsafe?.user?.first_name ||
+  "Guest";
 
+document.getElementById("username").innerText = username;
+
+/* ======================
+   CONSTANTS (временно)
+====================== */
 const HASH_COEF = 0.1;
 
-// Game loop
+/* ======================
+   GAME LOOP
+====================== */
 setInterval(() => {
-  state.balance += state.hash * HASH_COEF;
+  const income = state.hash * HASH_COEF;
+  state.balance += income;
+  state.totalEarned += income;
   save();
-  render();
+  renderStats();
 }, 1000);
 
+/* ======================
+   SAVE / RENDER
+====================== */
 function save() {
-  localStorage.setItem("game", JSON.stringify(state));
+  localStorage.setItem("grokGame", JSON.stringify(state));
 }
 
-function render() {
-  document.getElementById("balance").innerText = state.balance.toFixed(2);
+function renderStats() {
+  document.getElementById("balance").innerText = state.balance.toFixed(3);
   document.getElementById("hash").innerText = state.hash.toFixed(3);
   document.getElementById("income").innerText =
     (state.hash * HASH_COEF).toFixed(3);
 }
 
-function setActive(btn) {
-  document.querySelectorAll(".bottom-nav button")
+/* ======================
+   NAV
+====================== */
+function openScreen(screen, btn) {
+  document
+    .querySelectorAll(".bottom-nav button")
     .forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
-}
 
-function openScreen(screen) {
   const s = document.getElementById("screen");
 
-  document.querySelectorAll(".bottom-nav button").forEach(b => {
-    if (b.innerText.includes(screen === 'main' ? 'Баланс' :
-        screen === 'shop' ? 'Магазин' :
-        screen === 'ads' ? 'Реклама' : 'Профиль')) {
-      setActive(b);
-    }
-  });
+  /* ===== BALANCE ===== */
+  if (screen === "balance") {
+    s.innerHTML = `
+      <h3>💰 Баланс Grok</h3>
+      <p>Доступно: <b>${state.balance.toFixed(3)} GRK</b></p>
 
-  if (screen === "main") {
-    s.innerHTML = `<p>Твой майнинг работает 24/7. Улучшай оборудование 🚀</p>`;
+      <button onclick="deposit()">➕ Пополнить</button>
+      <button class="small" onclick="withdraw()">➖ Вывести</button>
+
+      <p style="margin-top:12px; font-size:13px; opacity:0.8;">
+        Вывод и пополнение работают через TON (в разработке)
+      </p>
+    `;
   }
 
+  /* ===== SHOP ===== */
   if (screen === "shop") {
     s.innerHTML = `
       <h3>🛒 Видеокарты</h3>
@@ -61,45 +89,59 @@ function openScreen(screen) {
     `;
   }
 
+  /* ===== ADS ===== */
   if (screen === "ads") {
     s.innerHTML = `
       <h3>📺 Реклама</h3>
+      <p>Просмотрено: ${state.adsWatched}</p>
       <button onclick="watchAd()">Смотреть рекламу</button>
     `;
   }
 
-  if (screen === "profile") {
+  /* ===== ACCOUNT ===== */
+  if (screen === "account") {
     s.innerHTML = `
-      <h3>⚙️ Профиль</h3>
-      <p>Hash Power: ${state.hash.toFixed(3)}</p>
-      <button onclick="reset()">Сброс прогресса</button>
+      <h3>👤 Аккаунт</h3>
+      <p>Ник: <b>${username}</b></p>
+      <p>⚡ Hash Power: ${state.hash.toFixed(3)}</p>
+      <p>💰 Всего заработано: ${state.totalEarned.toFixed(3)} GRK</p>
+      <p>📺 Просмотров рекламы: ${state.adsWatched}</p>
     `;
   }
 }
 
+/* ======================
+   ACTIONS
+====================== */
 function buy(price, hash) {
   if (state.balance >= price) {
     state.balance -= price;
     state.hash += hash;
     save();
-    render();
+    renderStats();
   } else {
-    alert("Недостаточно средств");
+    alert("Недостаточно Grok");
   }
 }
 
 function watchAd() {
-  state.hash += 0.02;
+  state.hash += 0.02; // временно
+  state.adsWatched++;
   save();
-  render();
+  renderStats();
+  openScreen("ads", document.querySelectorAll(".bottom-nav button")[2]);
 }
 
-function reset() {
-  if (confirm("Сбросить прогресс?")) {
-    localStorage.removeItem("game");
-    location.reload();
-  }
+function deposit() {
+  alert("Пополнение через TON Wallet (будет подключено)");
 }
 
-render();
-openScreen("main");
+function withdraw() {
+  alert("Вывод доступен при минимальной сумме (будет подключено)");
+}
+
+/* ======================
+   START
+====================== */
+renderStats();
+openScreen("balance", document.querySelector(".bottom-nav button.active"));
