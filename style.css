@@ -4,7 +4,7 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: system-ui, sans-serif;
   background: linear-gradient(160deg, #0b1024, #141a3a);
   color: #fff;
 }
@@ -29,29 +29,40 @@ header {
 .income {
   color: #4deeea;
   font-weight: bold;
-  margin-top: 4px;
 }
 
 .main-card {
   text-align: center;
-  padding: 24px 12px;
+  padding: 20px;
 }
 
 .main-card h2 {
-  font-size: 32px;
+  font-size: 34px;
   margin: 0;
 }
 
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.actions button {
+  flex: 1;
+}
+
 button {
-  width: 100%;
   padding: 14px;
-  margin-top: 12px;
   border-radius: 16px;
   border: none;
   background: linear-gradient(135deg, #6a7cff, #4deeea);
   color: #000;
   font-weight: 700;
-  font-size: 15px;
+}
+
+button.secondary {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
 }
 
 button:disabled {
@@ -99,7 +110,6 @@ button:disabled {
   background: rgba(255,255,255,0.1);
   color: #fff;
   font-size: 22px;
-  padding: 10px 0;
 }
 
 .bottom-nav span {
