@@ -2,18 +2,43 @@
   box-sizing: border-box;
 }
 
+/* ======= CRYPTO / MINING BACKGROUND ======= */
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
-  background: radial-gradient(circle at top, #0b1220, #05070d);
   color: #fff;
+
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(34,197,94,0.18), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(59,130,246,0.22), transparent 60%),
+    radial-gradient(700px 400px at 50% 100%, rgba(250,204,21,0.12), transparent 60%),
+    linear-gradient(180deg, #05070d 0%, #0b1220 50%, #05070d 100%);
 }
 
+/* лёгкое «дыхание» фона — НЕ трогает ячейки */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(600px 300px at 50% 50%, rgba(59,130,246,0.08), transparent 70%);
+  animation: bgMove 14s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes bgMove {
+  from { transform: translateY(-20px); }
+  to   { transform: translateY(20px); }
+}
+
+/* ======= APP ======= */
 .app {
   padding: 16px;
   padding-bottom: 120px;
 }
 
+/* ======= GLASS CARDS ======= */
 .glass {
   background: rgba(255,255,255,0.06);
   backdrop-filter: blur(16px);
@@ -26,6 +51,7 @@ header {
   margin-bottom: 16px;
 }
 
+/* ======= STATS ======= */
 .stats {
   display: flex;
   justify-content: space-between;
@@ -44,11 +70,12 @@ header {
 }
 
 @keyframes pulse {
-  0% { text-shadow: 0 0 6px #22c55e; }
-  50% { text-shadow: 0 0 14px #22c55e; }
+  0%   { text-shadow: 0 0 6px #22c55e; }
+  50%  { text-shadow: 0 0 14px #22c55e; }
   100% { text-shadow: 0 0 6px #22c55e; }
 }
 
+/* ======= MAIN ======= */
 .main-card {
   text-align: center;
   padding: 20px;
@@ -60,6 +87,7 @@ header {
   margin-top: 16px;
 }
 
+/* ======= BUTTONS ======= */
 button {
   padding: 14px;
   border-radius: 16px;
@@ -74,6 +102,11 @@ button.secondary {
   color: #fff;
 }
 
+button:disabled {
+  opacity: 0.5;
+}
+
+/* ======= SHOP CARDS ======= */
 .shop-card {
   background: linear-gradient(
     160deg,
@@ -86,6 +119,7 @@ button.secondary {
   margin-top: 14px;
 }
 
+/* ======= BOTTOM NAV ======= */
 .bottom-nav {
   position: fixed;
   bottom: 10px;
@@ -106,6 +140,7 @@ button.secondary {
   gap: 4px;
 }
 
+/* ======= ICONS ======= */
 .icon {
   width: 26px;
   height: 26px;
@@ -124,6 +159,7 @@ button.secondary {
   stroke-width: 1.75;
 }
 
+/* ======= ACTIVE TAB ======= */
 .bottom-nav .active {
   background: linear-gradient(135deg, #22c55e, #3b82f6);
   color: #000;
