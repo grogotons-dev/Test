@@ -4,14 +4,14 @@
 
 body {
   margin: 0;
-  font-family: 'Arial', sans-serif;
+  font-family: Arial, sans-serif;
   background: linear-gradient(160deg, #0f1220, #1b1f3b);
   color: #ffffff;
 }
 
 .app {
   padding: 16px;
-  padding-bottom: 110px;
+  padding-bottom: 120px;
 }
 
 .glass {
@@ -19,21 +19,15 @@ body {
   backdrop-filter: blur(12px);
   border-radius: 18px;
   padding: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
 }
 
 header {
   margin-bottom: 16px;
-  animation: fadeIn 0.6s ease;
-}
-
-.stats {
-  margin-top: 10px;
 }
 
 .stats div {
   margin-top: 6px;
-  font-size: 15px;
 }
 
 .income {
@@ -42,11 +36,10 @@ header {
 }
 
 main {
-  min-height: 220px;
-  animation: fadeInUp 0.4s ease;
+  min-height: 240px;
+  animation: fadeUp 0.4s ease;
 }
 
-/* Buttons */
 button {
   width: 100%;
   padding: 14px;
@@ -66,7 +59,11 @@ button:active {
   box-shadow: 0 0 20px rgba(124,124,255,0.6);
 }
 
-/* Bottom Nav */
+.small {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
 .bottom-nav {
   position: fixed;
   bottom: 10px;
@@ -95,13 +92,7 @@ button:active {
   color: #000;
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
-}
-
-@keyframes fadeInUp {
+@keyframes fadeUp {
   from {
     opacity: 0;
     transform: translateY(10px);
