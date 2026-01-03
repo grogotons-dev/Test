@@ -1,125 +1,105 @@
-// ===== TELEGRAM INIT =====
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// ===== GAME STATE =====
 let state = JSON.parse(localStorage.getItem("game")) || {
   balance: 0,
-  hash: 0,
-  adsToday: 0,
-  lastAdDate: null
+  hash: 0
 };
 
-// ===== USERNAME =====
 document.getElementById("username").innerText =
   tg.initDataUnsafe?.user?.username || "Guest Miner";
 
-// ===== CONSTANTS =====
 const HASH_COEF = 0.1;
-const MAX_ADS_PER_DAY = 20;
 
-// ===== GAME LOOP =====
+// Game loop
 setInterval(() => {
   state.balance += state.hash * HASH_COEF;
   save();
-  renderStats();
+  render();
 }, 1000);
 
-// ===== SAVE / LOAD =====
 function save() {
   localStorage.setItem("game", JSON.stringify(state));
 }
 
-// ===== RENDER =====
-function renderStats() {
+function render() {
   document.getElementById("balance").innerText = state.balance.toFixed(2);
-  document.getElementById("hash").innerText = state.hash.toFixed(2);
+  document.getElementById("hash").innerText = state.hash.toFixed(3);
   document.getElementById("income").innerText =
-    (state.hash * HASH_COEF).toFixed(2);
+    (state.hash * HASH_COEF).toFixed(3);
 }
 
-// ===== SCREENS =====
+function setActive(btn) {
+  document.querySelectorAll(".bottom-nav button")
+    .forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
 function openScreen(screen) {
   const s = document.getElementById("screen");
 
+  document.querySelectorAll(".bottom-nav button").forEach(b => {
+    if (b.innerText.includes(screen === 'main' ? 'Баланс' :
+        screen === 'shop' ? 'Магазин' :
+        screen === 'ads' ? 'Реклама' : 'Профиль')) {
+      setActive(b);
+    }
+  });
+
   if (screen === "main") {
-    s.innerHTML = `<p>Добро пожаловать в Hash Mining Idle.</p>`;
+    s.innerHTML = `<p>Твой майнинг работает 24/7. Улучшай оборудование 🚀</p>`;
   }
 
   if (screen === "shop") {
     s.innerHTML = `
-      <h3>🛒 Магазин видеокарт</h3>
-      <button onclick="buy(50, 1)">GTX 1050 (+1 Hash) — 50 HC</button>
-      <button onclick="buy(300, 6)">RTX 3060 (+6 Hash) — 300 HC</button>
-      <button onclick="buy(2000, 50)">RTX 4090 (+50 Hash) — 2000 HC</button>
+      <h3>🛒 Видеокарты</h3>
+      <button onclick="buy(100, 0.1)">GTX 1050 — +0.1 Hash</button>
+      <button onclick="buy(300, 0.3)">GTX 1660 — +0.3 Hash</button>
+      <button onclick="buy(800, 1)">RTX 3060 — +1 Hash</button>
+      <button onclick="buy(2500, 4)">RTX 3080 — +4 Hash</button>
+      <button onclick="buy(8000, 12)">RTX 4090 — +12 Hash</button>
     `;
   }
 
   if (screen === "ads") {
     s.innerHTML = `
       <h3>📺 Реклама</h3>
-      <p>Просмотров сегодня: ${state.adsToday}/${MAX_ADS_PER_DAY}</p>
-      <button onclick="watchAd()">Смотреть рекламу (+0.01 Hash)</button>
-    `;
-  }
-
-  if (screen === "refs") {
-    s.innerHTML = `
-      <h3>👥 Рефералы</h3>
-      <p>В будущем: реферальная система</p>
+      <button onclick="watchAd()">Смотреть рекламу</button>
     `;
   }
 
   if (screen === "profile") {
     s.innerHTML = `
       <h3>⚙️ Профиль</h3>
-      <p>Total Hash: ${state.hash.toFixed(2)}</p>
-      <button onclick="reset()">Сбросить прогресс</button>
+      <p>Hash Power: ${state.hash.toFixed(3)}</p>
+      <button onclick="reset()">Сброс прогресса</button>
     `;
   }
 }
 
-// ===== ACTIONS =====
 function buy(price, hash) {
   if (state.balance >= price) {
     state.balance -= price;
     state.hash += hash;
     save();
-    renderStats();
+    render();
   } else {
-    alert("Недостаточно HashCoin");
+    alert("Недостаточно средств");
   }
 }
 
 function watchAd() {
-  const today = new Date().toDateString();
-
-  if (state.lastAdDate !== today) {
-    state.adsToday = 0;
-    state.lastAdDate = today;
-  }
-
-  if (state.adsToday >= MAX_ADS_PER_DAY) {
-    alert("Лимит рекламы на сегодня");
-    return;
-  }
-
-  // здесь будет реальный рекламный SDK
-  state.adsToday++;
-  state.hash += 0.01;
-
+  state.hash += 0.02;
   save();
-  renderStats();
-  openScreen("ads");
+  render();
 }
 
 function reset() {
-  if (confirm("Точно сбросить прогресс?")) {
+  if (confirm("Сбросить прогресс?")) {
     localStorage.removeItem("game");
     location.reload();
   }
 }
 
-// ===== START =====
-renderStats();
+render();
 openScreen("main");
