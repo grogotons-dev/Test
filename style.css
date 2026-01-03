@@ -4,63 +4,110 @@
 
 body {
   margin: 0;
-  background: linear-gradient(160deg, #050505, #0d0d0d);
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(160deg, #0f1220, #1b1f3b);
   color: #ffffff;
 }
 
 .app {
   padding: 16px;
-  padding-bottom: 80px;
+  padding-bottom: 110px;
+}
+
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 header {
-  background: #111;
-  border-radius: 14px;
-  padding: 16px;
   margin-bottom: 16px;
-  box-shadow: 0 0 20px rgba(0,255,255,0.05);
+  animation: fadeIn 0.6s ease;
+}
+
+.stats {
+  margin-top: 10px;
 }
 
 .stats div {
   margin-top: 6px;
+  font-size: 15px;
+}
+
+.income {
+  color: #4deeea;
+  font-weight: bold;
 }
 
 main {
-  background: #0f0f0f;
-  border-radius: 14px;
-  padding: 16px;
-  min-height: 180px;
+  min-height: 220px;
+  animation: fadeInUp 0.4s ease;
 }
 
+/* Buttons */
 button {
   width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 14px;
   border: none;
-  background: #00ffff;
+  background: linear-gradient(135deg, #7c7cff, #4deeea);
   color: #000;
   font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 button:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
+  box-shadow: 0 0 20px rgba(124,124,255,0.6);
 }
 
-.nav {
+/* Bottom Nav */
+.bottom-nav {
   position: fixed;
-  bottom: 0;
-  width: 100%;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
   display: flex;
-  background: #000;
-  border-top: 1px solid #222;
+  gap: 6px;
 }
 
-.nav button {
+.bottom-nav button {
   flex: 1;
-  background: none;
-  color: #00ffff;
-  font-size: 18px;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 20px;
+  padding: 12px 6px;
+}
+
+.bottom-nav span {
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.bottom-nav button.active {
+  background: linear-gradient(135deg, #7c7cff, #4deeea);
+  color: #000;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
