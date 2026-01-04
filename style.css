@@ -597,3 +597,32 @@ button:disabled {
     padding: 10px 16px;
   }
 }
+/* ЭКРАН ЗАГРУЗКИ */
+#splash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #05070d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#splash img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain; /* Сохраняет пропорции картинки */
+  border-radius: 20px;
+}
+
+/* Основное приложение скрыто сначала */
+.app {
+  display: none;
+}
+
+.app.show {
+  display: block;
+}
