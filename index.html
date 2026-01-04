@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grok Invest</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+  <!-- Кнопка настроек -->
+  <div id="settingsBtn" class="settings-btn" onclick="toggleSettings()">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+    </svg>
+  </div>
+
+  <!-- Панель настроек -->
+  <div id="settingsPanel" class="settings-panel glass">
+    <div class="settings-section">
+      <div class="settings-title">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L9 5H6a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3l3 3v-16Z"/>
+        </svg>
+        <span id="settingsSoundTitle">Звук</span>
+      </div>
+      
+      <!-- Переключатель музыки -->
+      <div class="toggle-switch" style="margin-bottom: 20px;">
+        <div class="toggle-header">
+          <span id="musicToggleLabel">Фоновая музыка</span>
+          <button id="musicToggleBtn" class="toggle-btn" onclick="toggleMusic()">
+            <span id="musicToggleText">Вкл</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="volume-control">
+        <div class="volume-header">
+          <div class="volume-label" id="sfxLabel">Звуки эффектов</div>
+          <div class="volume-value" id="sfxValue">50%</div>
+        </div>
+        <div class="volume-slider-container">
+          <svg class="volume-icon" viewBox="0 0 24 24">
+            <path d="M12 2L9 5H6a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3l3 3v-16Z"/>
+          </svg>
+          <input type="range" min="0" max="100" value="50" class="volume-slider" id="sfxSlider">
+        </div>
+      </div>
+      
+      <div class="volume-control">
+        <div class="volume-header">
+          <div class="volume-label" id="musicLabel">Громкость музыки</div>
+          <div class="volume-value" id="musicValue">30%</div>
+        </div>
+        <div class="volume-slider-container">
+          <svg class="volume-icon" viewBox="0 0 24 24">
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="16" r="3"/>
+          </svg>
+          <input type="range" min="0" max="100" value="30" class="volume-slider" id="musicSlider">
+        </div>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <div class="settings-title">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12" y2="16"/>
+        </svg>
+        <span id="settingsLangTitle">Язык</span>
+      </div>
+      
+      <div class="language-switcher">
+        <button id="langRu" class="lang-btn active" onclick="setLanguage('ru')">
+          <span>🇷🇺</span> Русский
+        </button>
+        <button id="langEn" class="lang-btn" onclick="setLanguage('en')">
+          <span>🇺🇸</span> English
+        </button>
+      </div>
+    </div>
+    
+    <div style="margin-top: 20px; font-size: 13px; opacity: 0.7; text-align: center; line-height: 1.5;">
+      <span id="settingsInfo">💡 Настройки сохраняются автоматически</span>
+    </div>
+  </div>
+
+  <header class="glass">
+    <h2 id="username">Player</h2>
+    <div class="stats">
+      <div class="balance">
+        <svg class="mini-icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M8 12h8M12 8v8"/>
+        </svg>
+        <b><span id="balance">0</span> <span id="currency">GRK</span></b>
+      </div>
+      <div class="income">
+        <svg class="mini-icon" viewBox="0 0 24 24">
+          <path d="M3 17l6-6 4 4 7-7"/>
+        </svg>
+        <span id="income">0</span> <span id="perSecond">GRK / сек</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="screen" class="glass">
+    <!-- Контент будет рендериться через JS -->
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <button class="active" onclick="openScreen('home', this)">
+    <span id="navHome">Главная</span>
+  </button>
+
+  <button onclick="openScreen('shop', this)">
+    <span id="navShop">Магазин</span>
+  </button>
+
+  <button onclick="openScreen('tasks', this)">
+    <span id="navTasks">Задания</span>
+  </button>
+
+  <button onclick="openScreen('refs', this)">
+    <span id="navRefs">Рефералы</span>
+  </button>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
