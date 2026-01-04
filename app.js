@@ -3,7 +3,7 @@ if (tg) tg.expand();
 
 /* ========= НАСТРОЙКИ ЯЗЫКА ========= */
 const translations = {
-  ru: {
+  ru: 
     title: "Grok Invest",
     soundTitle: "Звук",
     langTitle: "Язык",
